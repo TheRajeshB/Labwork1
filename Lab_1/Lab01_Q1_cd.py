@@ -153,7 +153,10 @@ def Mercury_orbit():
      y_next   = y_initial_Merc + v_y_next*delta_t
      
      #finding angular momentum per unit mass, at each step, for Mercury 
+     
      ang_mom_Merc = (r_Merc*v_Merc)
+     #Way to calculate angular momentum per unit mass?:
+     #ang_mom_Merc = np.linalg.norm(np.cross((x_initial_Merc,y_initial_Merc),(v_x_initial,v_y_initial)))
      
      #adding data to previously created lists
      x_list.append(x_next) #list of x-values at each step

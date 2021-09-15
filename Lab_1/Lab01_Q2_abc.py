@@ -11,7 +11,7 @@ This code does:
 import matplotlib.pyplot as plt
 import numpy as np
 
-def Mercury_orbit():
+def Q2a():
 
     # setting constants
     M_sun = 1 # mass of sun in solar masses
@@ -37,15 +37,16 @@ def Mercury_orbit():
     earth_v_y_list = np.empty(n_steps) #list for y- velocities
     earth_av_list = np.empty(n_steps) #list for angular momentum
     
-    #setting inital conditions for Mercury 
-    jup_x = 5.2 #initial x-position of Mercury in AU 
-    jup_y = 0.0 #initial y - position of Mercury in AU
+    #setting inital conditions for Jupiter 
+    jup_x = 5.2 #initial x-position of Jupiter in AU 
+    jup_y = 0.0 #initial y - position of Jupiter in AU
     jup_v_x = 0.0 #initial x-velocity in AU/yr
     jup_v_y = 2.63 #initial y-veloctiy in AU/yr
     jup_av = np.linalg.norm(np.cross((jup_x,jup_y),(jup_v_x,jup_v_y)))
 
-    earth_x = 1.0 #initial x-position of Mercury in AU 
-    earth_y = 0.0 #initial y - position of Mercury in AU
+    #setting inital conditions for Earth
+    earth_x = 1.0 #initial x-position of Earth in AU 
+    earth_y = 0.0 #initial y - position of Earth in AU
     earth_v_x = 0.0 #initial x-velocity in AU/yr
     earth_v_y = 6.18 #initial y-veloctiy in AU/yr
     earth_av = np.linalg.norm(np.cross((earth_x,earth_y),(earth_v_x,earth_v_y))) #initial angular momentum in AU^2/yr
@@ -98,12 +99,12 @@ def Mercury_orbit():
      
     #checking if angular momentum is conserved
     if max(earth_av_list)-min(earth_av_list) != 0:
-        print('angular momentum is not conserved but varies by:',max(earth_av_list)-min(earth_av_list),'times the mass of Mercury ' )
+        print('angular momentum is not conserved but varies by:',max(earth_av_list)-min(earth_av_list),'times the mass of Earth' )
     else:
         print('angular momentum is conserved')
 
     #x vs y position plot for Jupiter and Earth
-    plt.errorbar(np.array([0,0.001]),np.array([0,0.001]), color = 'yellow', label = "Sun")
+    plt.plot(0,0, color = 'yellow', marker = 'o', label = "Sun", markersize = '5')
     plt.errorbar(np.array(jup_y_list),np.array(jup_x_list), color = 'orange', label = "Jupiter")
     plt.errorbar(np.array(earth_y_list),np.array(earth_x_list), color = 'b', label = "Earth")
     plt.legend()
@@ -133,6 +134,6 @@ def Mercury_orbit():
     plt.title('y-component of velocity vs time for Mercury')
     plt.show()"""
     
-print(Mercury_orbit())
+Q2a()
 
-#end of 1c
+#end of 2a
