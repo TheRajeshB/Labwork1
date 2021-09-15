@@ -1,7 +1,4 @@
-'''
-Authors: Gabriel Bailey and Farz Halim (?)
-This code does:
-'''Created on Mon Sep 13 14:06:42 2021
+"""Created on Mon Sep 13 14:06:42 2021
 
 @author: farzh
 """
