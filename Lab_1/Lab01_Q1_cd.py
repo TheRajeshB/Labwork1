@@ -10,7 +10,8 @@ def Mercury_orbit():
     
     #setting time-step and number of steps for integration
     delta_t = 0.0001
-    n_steps = int(1/delta_t)
+    years = 1.0 #number of Earth years over which values are calculated
+    n_steps = int(years*1/delta_t)
     
     #creating lists to store data
     x_list = [0.47] #list for x-values
@@ -83,14 +84,14 @@ def Mercury_orbit():
     plt.show()
     
     #x-component of velocity vs time graph for Mercury
-    plt.errorbar(np.arange(0.0,1.0+delta_t,delta_t),v_x_list)
+    plt.errorbar(np.arange(0.0,years+delta_t,delta_t),v_x_list)
     plt.xlabel('Time in Earth year')
     plt.ylabel("x-component of Mercury's velocity in AU/yr" )
     plt.title('x-component of velocity vs time for Mercury')
     plt.show()
     
     #y-component of velocity vs time graph for Mercury
-    plt.errorbar(np.arange(0.0,1.0+delta_t,delta_t),v_y_list)
+    plt.errorbar(np.arange(0.0,years+delta_t,delta_t),v_y_list)
     plt.xlabel('Time in Earth year')
     plt.ylabel("y-component of Mercury's velocity in AU/yr" )
     plt.title('y-component of velocity vs time for Mercury')
@@ -109,7 +110,10 @@ def Mercury_orbit():
     
     #setting time-step and number of steps for integration
     delta_t = 0.0001
-    n_steps = int(1/delta_t)
+    years = 1.0 #number of Earth years over which values are calculated 
+    n_steps = int(years*(1/delta_t))
+    
+    
     
     #creating lists to store data
     x_list = [0.47] #list for x-values
@@ -185,15 +189,16 @@ def Mercury_orbit():
     plt.title('plot of x vs y position of Mercury over its orbit(accounting for relativistic effects)')
     plt.show()
     
+    
     #x-component of velocity vs time graph for Mercury
-    plt.errorbar(np.arange(0.0,1.0+delta_t,delta_t),v_x_list)
+    plt.errorbar(np.arange(0.0,years+delta_t,delta_t),v_x_list)
     plt.xlabel('Time (in Earth year)')
     plt.ylabel("x-component of Mercury's velocity (in AU/yr)" )
     plt.title('x-component of velocity vs time for Mercury(accounting for relativistic effects)')
     plt.show()
     
     #y-component of velocity vs time graph for Mercury
-    plt.errorbar(np.arange(0.0,1.0+delta_t,delta_t),v_y_list)
+    plt.errorbar(np.arange(0.0,years+delta_t,delta_t),v_y_list)
     plt.xlabel('Time (in Earth year)')
     plt.ylabel("y-component of Mercury's velocity (in AU/yr)" )
     plt.title('y-component of velocity vs time for Mercury(accounting for relativistic effects)')
