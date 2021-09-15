@@ -121,7 +121,7 @@ def Mercury_orbit():
     v_x_list = [0.0] #list for x-velocities
     v_y_list = [8.17] #list for y- velocities
     ang_list = [] #list for angular momentum
-    r_list = [] #list for all 'r' (distance from Sun) values
+    
     
     
     # setting constants
@@ -164,7 +164,7 @@ def Mercury_orbit():
      v_x_list.append(v_x_next) #list of x-velocities at each step
      v_y_list.append(v_y_next) #list of y-velocities at each step 
      ang_list.append(ang_mom_Merc)
-     r_list.append(r_Merc)
+    
      
      
      
