@@ -35,30 +35,37 @@ def histogram(min, max, M, samples):
 
 #Set the parameters for the experiment
 M = 1000
-min = -5
-max = 5
-for N in [10, 100, 1000, 10000, 100000, 1000000]:
+range_min = -5
+range_max = 5
+Ns = [10, 100, 1000, 10000, 100000, 1000000]
+#The lists that store the times
+times = []
+nptimes = []
+
+for N in Ns:
     #Create the sample data
     samples = np.random.randn(N)
 
     #Time how long it takes to run my histogram function
     start = time()
-    hist, bin_edges = histogram(min, max, M, samples)
+    hist, bin_edges = histogram(range_min, range_max, M, samples)
     end = time()
 
     #Time how long it takes to run numpy's histogram function
     npstart = time()
-    nphist, npbin_edges = np.histogram(samples, bins=M, range=[min,max])
+    nphist, npbin_edges = np.histogram(samples, bins=M, range=[range_min,range_max])
     npend = time()
 
-    #print(end-start, npend-npstart)
+    times.append(end-start)
+    nptimes.append(npend-npstart)
+
 
     #Print the difference in time taken and whether the results are the same
     print("Time taken for", N, "samples (my hist vs np hist):", end-start, npend-npstart)
     print("histogram results are equal: ", np.array_equal(hist,nphist))
 
     #Plot both histogram results to compare (can comment this out if you want to test all 6 values of N immediately)
-    bar1 = plt.bar(bin_edges, hist, width=(max-min)/M, color = 'b',alpha=0.5)
+    """bar1 = plt.bar(bin_edges, hist, width=(max-min)/M, color = 'b',alpha=0.5)
     bar1.set_label("My histogram")
     bar2 = plt.bar(npbin_edges[:-1], nphist, width=(max-min)/M, color = 'r',alpha=0.5)
     bar2.set_label("numpy's histogram")
@@ -67,4 +74,15 @@ for N in [10, 100, 1000, 10000, 100000, 1000000]:
     plt.ylabel('Frequency')
     plt.title('Histogram Comparision (overlap is purple)')
     plt.yscale("log")
-    plt.show()
+    plt.show()"""
+
+# Plot a time comparision of our histogram function to numpy's histogram function with a logarithmic y axis.
+plt.plot(Ns, times, color = 'b', label="My histogram")
+plt.plot(Ns, nptimes, color = 'r', label = "numpy's histogram")
+plt.legend()
+plt.xlabel('N')
+plt.ylabel('Time taken (s)')
+plt.title('Histogram Function Time Comparision')
+plt.yscale("log")
+#plt.xscale("log")
+plt.show()
