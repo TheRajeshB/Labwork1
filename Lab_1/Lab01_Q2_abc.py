@@ -95,12 +95,11 @@ def Q2( duration,
         earth_av_list[i] = (earth_av) #list of angular-velocities at each step
 
         #new x velocity and position, uding Euler-Cromer integration 
-        earth_v_x = earth_v_x - ((G*M_sun*earth_x)/(earth_r**3) + (G*M_jup*earth_x)/(earth_jup_r**3))*delta_t
-        #should the 'x' here not be the distance betwen Earth and Jupiter and not just the x-value of Earth(same for the y-velocity)
+        earth_v_x = earth_v_x - ((G*M_sun*earth_x)/(earth_r**3) + (G*M_jup*(earth_x-jup_x))/(earth_jup_r**3))*delta_t
         earth_x   = earth_x + earth_v_x*delta_t
 
         #new y velocity and position, uding Euler-Cromer integration 
-        earth_v_y = earth_v_y - ((G*M_sun*earth_y)/(earth_r**3) + (G*M_jup*earth_y)/(earth_jup_r**3))*delta_t
+        earth_v_y = earth_v_y - ((G*M_sun*earth_y)/(earth_r**3) + (G*M_jup*(earth_y-jup_y))/(earth_jup_r**3))*delta_t
         earth_y   = earth_y + earth_v_y*delta_t
 
         #finding angular momentum per unit mass, at each step, for Earth 
@@ -115,11 +114,11 @@ def Q2( duration,
 
     #x vs y position plot for Jupiter and Earth
     plt.plot(0,0, color = 'yellow', marker = 'o', label = "Sun", markersize = '5')
-    plt.errorbar(jup_y_list,jup_x_list, color = 'orange', label = "Jupiter")
-    plt.errorbar(earth_y_list,earth_x_list, color = 'b', label = "Earth")
+    plt.errorbar(jup_x_list, jup_y_list, color = 'orange', label = "Jupiter")
+    plt.errorbar(earth_x_list, earth_y_list, color = 'b', label = "Earth")
     plt.legend()
-    plt.xlabel('y-position in AU')
-    plt.ylabel('x-position in AU')
+    plt.xlabel('x-position in AU')
+    plt.ylabel('y-position in AU')
     plt.title('Plot of Position of Jupiter and Earth')
     plt.show()
 

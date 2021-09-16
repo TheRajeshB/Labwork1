@@ -77,10 +77,11 @@ def Mercury_orbit():
     else:
         print('angular momentum is conserved')
     #x vs y position plot for Mercury
-    plt.errorbar(np.array([y_list]),np.array([x_list]))
-    plt.xlabel('y-position of Mercury in AU')
-    plt.ylabel('x-position of Mercury in AU')
-    plt.title('plot of x vs y position of Mercury over its orbit')
+    plt.plot(0,0, color = 'yellow', marker = 'o', label = "Sun", markersize = '5')
+    plt.errorbar(np.array([x_list]),np.array([y_list]))
+    plt.xlabel('x-position of Mercury in AU')
+    plt.ylabel('y-position of Mercury in AU')
+    plt.title('Plot of x vs y position of Mercury over its orbit')
     plt.show()
     
     #x-component of velocity vs time graph for Mercury
@@ -165,18 +166,11 @@ def Mercury_orbit():
      v_y_list.append(v_y_next) #list of y-velocities at each step 
      ang_list.append(ang_mom_Merc)
     
-     
-     
-     
-    
      #re-setting values for next step of integration
      x_initial_Merc = x_next
      y_initial_Merc = y_next
      v_x_initial    = v_x_next
      v_y_initial    = v_y_next
-    
-     
-
      
     #checking if angular momentum is conserved
     if max(ang_list)-min(ang_list) != 0:
@@ -184,12 +178,12 @@ def Mercury_orbit():
     else:
         print('angular momentum is conserved')
     #x vs y position plot for Mercury
-    plt.errorbar(np.array([y_list]),np.array([x_list]))
-    plt.plot(0,0,'bo', markersize = '5')
+    plt.plot(0,0, color = 'yellow', marker = 'o', label = "Sun", markersize = '5')
+    plt.errorbar(np.array([x_list]),np.array([y_list]))
     plt.text(0,0,'Position of Sun')
-    plt.xlabel('y-position of Mercury (in AU)')
-    plt.ylabel('x-position of Mercury (in AU)')
-    plt.title('plot of x vs y position of Mercury over its orbit(accounting for relativistic effects)')
+    plt.xlabel('x-position of Mercury (in AU)')
+    plt.ylabel('y-position of Mercury (in AU)')
+    plt.title('Plot of x vs y position of Mercury over its orbit\n(accounting for relativistic effects)')
     plt.show()
     
     
@@ -197,14 +191,14 @@ def Mercury_orbit():
     plt.errorbar(np.arange(0.0,years+delta_t,delta_t),v_x_list)
     plt.xlabel('Time (in Earth year)')
     plt.ylabel("x-component of Mercury's velocity (in AU/yr)" )
-    plt.title('x-component of velocity vs time for Mercury(accounting for relativistic effects)')
+    plt.title('x-component of velocity vs time for Mercury\n(accounting for relativistic effects)')
     plt.show()
     
     #y-component of velocity vs time graph for Mercury
     plt.errorbar(np.arange(0.0,years+delta_t,delta_t),v_y_list)
     plt.xlabel('Time (in Earth year)')
     plt.ylabel("y-component of Mercury's velocity (in AU/yr)" )
-    plt.title('y-component of velocity vs time for Mercury(accounting for relativistic effects)')
+    plt.title('y-component of velocity vs time for Mercury\n(accounting for relativistic effects)')
     plt.show()
     
 print(Mercury_orbit())
