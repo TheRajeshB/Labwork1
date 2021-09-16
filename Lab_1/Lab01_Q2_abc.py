@@ -96,6 +96,7 @@ def Q2( duration,
 
         #new x velocity and position, uding Euler-Cromer integration 
         earth_v_x = earth_v_x - ((G*M_sun*earth_x)/(earth_r**3) + (G*M_jup*earth_x)/(earth_jup_r**3))*delta_t
+        #should the 'x' here not be the distance betwen Earth and Jupiter and not just the x-value of Earth(same for the y-velocity)
         earth_x   = earth_x + earth_v_x*delta_t
 
         #new y velocity and position, uding Euler-Cromer integration 
