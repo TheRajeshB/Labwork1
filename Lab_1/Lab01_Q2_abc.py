@@ -59,10 +59,14 @@ def Q2( duration,
     #earth_v_y = 6.18 #initial y-veloctiy in AU/yr
     earth_av = np.linalg.norm(np.cross((earth_x,earth_y),(earth_v_x,earth_v_y))) #initial angular momentum in AU^2/yr
 
+    jup_r = ((jup_x)**2 + (jup_y)**2)**0.5 #distance from the Sun to Jupiter
+    earth_r = ((earth_x)**2 + (earth_y)**2)**0.5 #distance from the Sun to Earth
+    earth_jup_r = ((earth_x-jup_x)**2 + (earth_y-jup_y)**2)**0.5 #distance from Jupiter to Earth
+
     #loop to carry out numerical integration
     for i in range(0, n_steps):
 
-        #adding data to previously created lists
+        #adding data to storage lists
         times[i] = (i*delta_t)
         jup_x_list[i] = (jup_x) #list of x-values at each step
         jup_y_list[i] = (jup_y) #list of y-values at each step
@@ -70,23 +74,6 @@ def Q2( duration,
         jup_v_y_list[i] = (jup_v_y) #list of y-velocities at each step 
         jup_av_list[i] = (jup_av) #list of angular-velocities at each step
 
-        #defining 'r' 
-        jup_r = ((jup_x)**2 + (jup_y)**2)**0.5 #distance from the Sun to Jupiter
-        earth_r = ((earth_x)**2 + (earth_y)**2)**0.5 #distance from the Sun to Earth
-        earth_jup_r = ((earth_x-jup_x)**2 + (earth_y-jup_y)**2)**0.5 #distance from Jupiter to Earth
-        
-        #new x velocity and position, uding Euler-Cromer integration 
-        jup_v_x = jup_v_x - ((G*M_sun*jup_x)/(jup_r**3))*delta_t
-        jup_x   = jup_x + jup_v_x*delta_t
-
-        #new y velocity and position, uding Euler-Cromer integration 
-        jup_v_y = jup_v_y - ((G*M_sun*jup_y)/(jup_r**3))*delta_t
-        jup_y   = jup_y + jup_v_y*delta_t
-
-        #finding angular momentum per unit mass, at each step, for Jupiter 
-        jup_av = np.linalg.norm(np.cross((jup_x,jup_y),(jup_v_x,jup_v_y)))
-
-        #Calculations for Earth
         earth_jup_r_list[i] = earth_jup_r
         earth_x_list[i] = (earth_x) #list of x-values at each step
         earth_y_list[i] = (earth_y) #list of y-values at each step
@@ -94,15 +81,29 @@ def Q2( duration,
         earth_v_y_list[i] = (earth_v_y) #list of y-velocities at each step 
         earth_av_list[i] = (earth_av) #list of angular-velocities at each step
 
-        #new x velocity and position, uding Euler-Cromer integration 
-        earth_v_x = earth_v_x - ((G*M_sun*earth_x)/(earth_r**3) + (G*M_jup*(earth_x-jup_x))/(earth_jup_r**3))*delta_t
-        earth_x   = earth_x + earth_v_x*delta_t
-
-        #new y velocity and position, uding Euler-Cromer integration 
+        #defining radiuses between the sun and the planets 
+        jup_r = ((jup_x)**2 + (jup_y)**2)**0.5 #distance from the Sun to Jupiter
+        earth_r = ((earth_x)**2 + (earth_y)**2)**0.5 #distance from the Sun to Earth
+        earth_jup_r = ((earth_x-jup_x)**2 + (earth_y-jup_y)**2)**0.5 #distance from Jupiter to Earth
+        
+        #Calculations Jupiter velocity 
+        jup_v_x = jup_v_x - ((G*M_sun*jup_x)/(jup_r**3))*delta_t 
+        jup_v_y = jup_v_y - ((G*M_sun*jup_y)/(jup_r**3))*delta_t
+        
+        #Calculations Earth's velocity
+        earth_v_x = earth_v_x - ((G*M_sun*earth_x)/(earth_r**3) + (G*M_jup*(earth_x-jup_x))/(earth_jup_r**3))*delta_t 
         earth_v_y = earth_v_y - ((G*M_sun*earth_y)/(earth_r**3) + (G*M_jup*(earth_y-jup_y))/(earth_jup_r**3))*delta_t
+
+        #Calculations Jupiter's velocity, using Euler-Cromer integration
+        jup_x   = jup_x + jup_v_x*delta_t
+        jup_y   = jup_y + jup_v_y*delta_t
+
+        #Calculations Earth's velocity, using Euler-Cromer integration
+        earth_x   = earth_x + earth_v_x*delta_t
         earth_y   = earth_y + earth_v_y*delta_t
 
-        #finding angular momentum per unit mass, at each step, for Earth 
+        #finding angular momentum per unit mass, at each step, for Jupiter and Earth
+        jup_av = np.linalg.norm(np.cross((jup_x,jup_y),(jup_v_x,jup_v_y))) 
         earth_av = np.linalg.norm(np.cross((earth_x,earth_y),(earth_v_x,earth_v_y)))
      
      
