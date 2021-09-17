@@ -2,6 +2,7 @@
 
 @author: farzh
 """
+#1c 
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -38,8 +39,7 @@ def Mercury_orbit():
      #defining 'r' 
      r_Merc = ((x_initial_Merc)**2 + (y_initial_Merc)**2)**0.5
      
-     #defining net velocity of Mercury 
-     v_Merc = ((v_x_initial)**2 + (v_y_initial**2))**0.5
+     
      
      #new x velocity and position, uding Euler-Cromer integration 
      v_x_next = v_x_initial - ((G*M_sun*x_initial_Merc)/(r_Merc**3))*delta_t
@@ -50,7 +50,8 @@ def Mercury_orbit():
      y_next   = y_initial_Merc + v_y_next*delta_t
      
      #finding angular momentum per unit mass, at each step, for Mercury 
-     ang_mom_Merc = (r_Merc*v_Merc)
+     
+     ang_mom_Merc = np.linalg.norm(np.cross((x_initial_Merc,y_initial_Merc),(v_x_initial,v_y_initial)))
      
      #adding data to previously created lists
      x_list.append(x_next) #list of x-values at each step
@@ -62,6 +63,7 @@ def Mercury_orbit():
      
      
      
+    
     
      #re-setting values for next step of integration
      x_initial_Merc = x_next
@@ -77,11 +79,12 @@ def Mercury_orbit():
     else:
         print('angular momentum is conserved')
     #x vs y position plot for Mercury
+    plt.errorbar(np.array([y_list]),np.array([x_list]),label='Mercury orbit')
     plt.plot(0,0, color = 'yellow', marker = 'o', label = "Sun", markersize = '5')
-    plt.errorbar(np.array([x_list]),np.array([y_list]))
-    plt.xlabel('x-position of Mercury in AU')
-    plt.ylabel('y-position of Mercury in AU')
-    plt.title('Plot of x vs y position of Mercury over its orbit')
+    plt.xlabel('y-position of Mercury in AU')
+    plt.ylabel('x-position of Mercury in AU')
+    plt.legend(loc='upper right')
+    plt.title('plot of x vs y position of Mercury over its orbit')
     plt.show()
     
     #x-component of velocity vs time graph for Mercury
@@ -100,13 +103,10 @@ def Mercury_orbit():
     
 print(Mercury_orbit())
 
-#end of 1c
-
-#beginning of 1d
-
+#1d
 import matplotlib.pyplot as plt
 import numpy as np
-
+    
 def Mercury_orbit():
     
     #setting time-step and number of steps for integration
@@ -139,11 +139,10 @@ def Mercury_orbit():
     #loop to carry out numerical integration
     for i in range(1, n_steps+1):
      
-     #defining 'r' 
+     #defining 'r' for Mercury 
      r_Merc = ((x_initial_Merc)**2 + (y_initial_Merc)**2)**0.5
      
-     #defining net velocity of Mercury 
-     v_Merc = ((v_x_initial)**2 + (v_y_initial**2))**0.5
+    
      
      #new x velocity and position, uding Euler-Cromer integration 
      v_x_next = v_x_initial - (((G*M_sun*x_initial_Merc)/(r_Merc**3))*(1 +(alpha/r_Merc**2))*delta_t)
@@ -154,10 +153,7 @@ def Mercury_orbit():
      y_next   = y_initial_Merc + v_y_next*delta_t
      
      #finding angular momentum per unit mass, at each step, for Mercury 
-     
-     ang_mom_Merc = (r_Merc*v_Merc)
-     #Way to calculate angular momentum per unit mass?:
-     #ang_mom_Merc = np.linalg.norm(np.cross((x_initial_Merc,y_initial_Merc),(v_x_initial,v_y_initial)))
+     ang_mom_Merc = np.linalg.norm(np.cross((x_initial_Merc,y_initial_Merc),(v_x_initial,v_y_initial)))
      
      #adding data to previously created lists
      x_list.append(x_next) #list of x-values at each step
@@ -165,12 +161,20 @@ def Mercury_orbit():
      v_x_list.append(v_x_next) #list of x-velocities at each step
      v_y_list.append(v_y_next) #list of y-velocities at each step 
      ang_list.append(ang_mom_Merc)
+     
+    
+     
+     
+     
     
      #re-setting values for next step of integration
      x_initial_Merc = x_next
      y_initial_Merc = y_next
      v_x_initial    = v_x_next
      v_y_initial    = v_y_next
+    
+     
+
      
     #checking if angular momentum is conserved
     if max(ang_list)-min(ang_list) != 0:
@@ -178,12 +182,12 @@ def Mercury_orbit():
     else:
         print('angular momentum is conserved')
     #x vs y position plot for Mercury
-    plt.plot(0,0, color = 'yellow', marker = 'o', label = "Sun", markersize = '5')
-    plt.errorbar(np.array([x_list]),np.array([y_list]))
+    plt.errorbar(np.array([y_list]),np.array([x_list]))
+    plt.plot(0,0,'bo', markersize = '5')
     plt.text(0,0,'Position of Sun')
-    plt.xlabel('x-position of Mercury (in AU)')
-    plt.ylabel('y-position of Mercury (in AU)')
-    plt.title('Plot of x vs y position of Mercury over its orbit\n(accounting for relativistic effects)')
+    plt.xlabel('y-position of Mercury (in AU)')
+    plt.ylabel('x-position of Mercury (in AU)')
+    plt.title('plot of x vs y position of Mercury over its orbit(accounting for relativistic effects)')
     plt.show()
     
     
@@ -191,14 +195,14 @@ def Mercury_orbit():
     plt.errorbar(np.arange(0.0,years+delta_t,delta_t),v_x_list)
     plt.xlabel('Time (in Earth year)')
     plt.ylabel("x-component of Mercury's velocity (in AU/yr)" )
-    plt.title('x-component of velocity vs time for Mercury\n(accounting for relativistic effects)')
+    plt.title('x-component of velocity vs time for Mercury(accounting for relativistic effects)')
     plt.show()
     
     #y-component of velocity vs time graph for Mercury
     plt.errorbar(np.arange(0.0,years+delta_t,delta_t),v_y_list)
     plt.xlabel('Time (in Earth year)')
     plt.ylabel("y-component of Mercury's velocity (in AU/yr)" )
-    plt.title('y-component of velocity vs time for Mercury\n(accounting for relativistic effects)')
+    plt.title('y-component of velocity vs time for Mercury(accounting for relativistic effects)')
     plt.show()
     
 print(Mercury_orbit())
