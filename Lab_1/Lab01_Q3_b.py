@@ -24,7 +24,7 @@ def histogram(min, max, M, samples):
     """
     #Initialize hist and bin_edges
     hist = np.zeros(M, dtype=int)
-    bin_edges = np.arange(min,max,(max-min)/M, dtype=float)
+    bin_edges = np.arange(min,max+(max-min)/M,(max-min)/M, dtype=float)
 
     #Iterate accross all values in samples to count up hist
     for num in samples:
@@ -34,13 +34,13 @@ def histogram(min, max, M, samples):
     return hist, bin_edges
 
 #Set the parameters for the experiment
-M = 1000
-range_min = -5
-range_max = 5
-Ns = [10, 100, 1000, 10000, 100000, 1000000]
+M = 1000 # The number of bins
+range_min = -5 # The minimum value in the range the bins are created over
+range_max = 5 # The maximum value in the range the bins are created over
+Ns = [10, 100, 1000, 10000, 100000, 1000000] #list of the values of N to test with
 #The lists that store the times
-times = []
-nptimes = []
+times = [] #list to store how long my histogram function runs for different values of N
+nptimes = [] #list to store how long numpy's histogram function runs for different values of N
 
 for N in Ns:
     #Create the sample data
