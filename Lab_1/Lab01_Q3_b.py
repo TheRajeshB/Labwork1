@@ -65,7 +65,7 @@ for N in Ns:
     print("histogram results are equal: ", np.array_equal(hist,nphist))
 
     #Plot both histogram results to compare (can comment this out if you want to test all 6 values of N immediately)
-    """bar1 = plt.bar(bin_edges, hist, width=(range_max-range_min)/M, color = 'b',alpha=0.5)
+    """bar1 = plt.bar(bin_edges[:-1], hist, width=(range_max-range_min)/M, color = 'b',alpha=0.5)
     bar1.set_label("My histogram")
     bar2 = plt.bar(npbin_edges[:-1], nphist, width=(range_max-range_min)/M, color = 'r',alpha=0.5)
     bar2.set_label("numpy's histogram")

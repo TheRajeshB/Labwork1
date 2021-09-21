@@ -28,8 +28,8 @@ def simp_integrate(f, N, a, b):
     #Based on the lecture slides:
     h = (b-a)/N
     area = 0
-    if N // 2 != 0: #if N is odd calc the last slice with trapezoidal rule
-        area += f(a+(N-1)*h)
+    if N % 2 == 1: #if N is odd calc the last slice with trapezoidal rule
+        area += h*f(a+(N-1)*h)
         N -= 1
     
     A_odd = 0
@@ -49,57 +49,50 @@ def f(x):
     return(4/(1+x**2))
 
 #ii
+print("\npart ii")
 
 print("Real value (via sympy):    ",float(symb_integrate(f,0,1)))
 print("Trapezoidal integration:   ",trap_integrate(f,10,0,1))
 print("Simpson's rule integration:",simp_integrate(f,10,0,1))
 
 #iii
-
+print("\npart iii")
 
 val = symb_integrate(f,0,1)
 
-
-n = 10
+n = 2
 trap_val = trap_integrate(f,n,0,1)
-while float(abs(trap_val-val)) > 10**-9: #Multiplicative loop to get to general vicinity fast
-    n += int(n*0.1)
+while float(abs(trap_val-val)) > 10**-8: #Multiplicative loop to get to general vicinity fast
+    n *= 2
     trap_val = trap_integrate(f,n,0,1)
 
-n = int(n /1.1) #backtrack one
-trap_val = trap_integrate(f,n,0,1)
-while float(abs(trap_val-val)) > 10**-9: #One by one to get "exact" point
-    #print(float(abs(trap_val-val)))
-    n += 1
-    trap_val = trap_integrate(f,n,0,1)
-
-print("Trap N required to reduce error below O(10^-9):", n)
+print("Trap N required to reduce error to O(10^-9):", n)
 print("Trap error:", float(abs(trap_val-val)))
-trap_start = time()
+start = time()
 for i in range(1000):
     trap_integrate(f,n,0,1)
-trap_end = time()
-print("Trap Time Taken:",(trap_end-trap_start)/1000, "s")
-'''
-n = 4
+end = time()
+print("Trap Time Taken:",(end-start)/1000, "s")
+
+n = 2
 simp_val = simp_integrate(f,n,0,1)
-while abs(simp_val-val) > 10**-9:
-    print(abs(simp_val-val))
-    n += 1
+while float(abs(simp_val-val)) > 10**-8: #Multiplicative loop to get to general vicinity fast
+    #print(float(abs(simp_val-val)))
+    n *= 2
     simp_val = simp_integrate(f,n,0,1)
 
-print("Simp N requied to reduce error below O(10^-9):", n)
-print("Simp error:", abs(simp_val-val))
-'''
-'''
-# Plot a time comparision of our histogram function to numpy's histogram function with a logarithmic y axis.
-plt.plot(Ns, times, color = 'b', label="My histogram")
-plt.plot(Ns, nptimes, color = 'r', label = "numpy's histogram")
-plt.legend()
-plt.xlabel('N')
-plt.ylabel('Time taken (s)')
-plt.title('Histogram Function Time Comparision')
-plt.yscale("log")
-#plt.xscale("log")
-plt.show()
-'''
+print("Simp N requied to reduce error to O(10^-9):", n)
+print("Simp error:", float(abs(simp_val-val)))
+start = time()
+for i in range(1000):
+    trap_integrate(f,n,0,1)
+end = time()
+print("Simp Time Taken:",(end-start)/1000, "s")
+
+#iv
+print("\npart iv")
+
+I1 = trap_integrate(f,16,0,1)
+I2 = trap_integrate(f,32,0,1)
+e2 = 1/3*abs(I2-I1)
+print("The error for N=32 is", e2, "based on the 'practical estimation of errors' method.")
