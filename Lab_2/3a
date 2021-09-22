@@ -1,0 +1,59 @@
+from math import *
+import numpy as np
+from scipy.integrate import quad
+from scipy.special import kn
+#defining various terms and functions used in eqn 8 
+
+
+ 
+def V(u):
+    Q =10**-13 #charge in Couloumb
+    a = tan(u)
+    b = cos(u)
+    z = 0
+    epsilon = 8.854e-12
+    l = 1 # in mm
+    k = Q/(4*pi*epsilon)
+    r= 0.25
+    
+    #r = np.arange(0.25,5,0.01)  #range of values for 'r' in mm  
+    c = ((z-l*a)**2 + r**2)**0.5 #terms under root in denominator
+    
+    
+    return (k*e**-(a**2))/((b**2)*c)
+    #return Q*(e**(-(a**2)))/(4*pi*epsilon*(b**2)*c)
+
+#fix to simpsons
+def simp(f,a,b,N):
+    
+  
+    h= (b-a)/N
+    
+    sum_odd = 0.0
+    sum_even = 0.0
+    initial_sum = f(a) + f(b)
+    print(initial_sum)
+    
+    #loop to find sum of odd terms for Simpson integration
+    for j in range(1,int(N),2):
+        sum_odd  += f((a+j*h))
+     
+    #loop to find sum of even terms for Simpson integration
+    for m in range(2,int(N),2):
+        sum_even += f((a+m*h))
+    return(h*(initial_sum + 4*sum_odd + 2*sum_even)/3)
+
+Q =10**-13 #charge in Couloumb
+epsilon = 8.854e-12
+l=1
+r = 0.25
+k = Q/(4*pi*epsilon)
+print(Q/(4*pi*epsilon))
+d= (r**2)/(2*(l**2))
+
+eqn_9 = k*(e**d)*kn(0,d)/l
+print('Result from eqn 9 is:', eqn_9)
+
+print('Result from Simpson integration is:',simp(V,-pi/2,pi/2,8))
+
+print(quad(V,-pi/2,pi/2))
