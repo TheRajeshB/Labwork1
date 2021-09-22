@@ -5,8 +5,9 @@
 This code will calculate definite integrals using Trapezoidal and Simpsons's rules for integration.
 NEED MORE ON WHAT IT PRODUCES
 """
-from IntegrationFunctions import symb_integrate, trap_integrate, simp_integrate
+from IntegrationFunctions import trap_integrate, simp_integrate
 from time import time
+from scipy.constants import pi
 
 import sympy # the symbolic math package
 
@@ -17,14 +18,16 @@ def f(x):
 #ii
 print("\npart ii")
 
-print("Real value (via sympy):    ",float(symb_integrate(f,0,1)))
+print("Real value (via sympy):    ",float(pi))
 print("Trapezoidal integration:   ",trap_integrate(f,10,0,1))
 print("Simpson's rule integration:",simp_integrate(f,10,0,1))
 
 #iii
 print("\npart iii")
 
-val = symb_integrate(f,0,1)
+#from IntegrationFunctions import symb_integrate
+#val = symb_integrate(f,0,1)
+val = pi
 
 n = 2
 trap_val = trap_integrate(f,n,0,1)
@@ -47,7 +50,7 @@ while float(abs(simp_val-val)) > 10**-8: #Multiplicative loop to get to general 
     n *= 2
     simp_val = simp_integrate(f,n,0,1)
 
-print("Simp N requied to reduce error to O(10^-9):", n)
+print("Simp N required to reduce error to O(10^-9):", n)
 print("Simp error:", float(abs(simp_val-val)))
 start = time()
 for i in range(1000):

@@ -5,6 +5,8 @@
 This code will define functions that calculate definite integrals using Symbolic maths, Trapezoidal rule and Simpsons's rules for integration.
 """
 import sympy # the symbolic math package
+import numpy as np
+from scipy.constants import pi
 
 def symb_integrate(f, a, b): # symbolic integration to test errors
     #Directly from the lecture slides:
@@ -39,3 +41,11 @@ def simp_integrate(f, N, a, b):
 
     area += h/3 * (f(a) + f(b) + 4*A_odd + 2*A_even)
     return area
+
+#Bessel functions:
+def f_inner(phi,x,n):
+    return(np.cos(n*phi-x*np.sin(phi)))
+
+# nth order Bessel function
+def J(x,n):
+    return(1/pi*simp_integrate(lambda phi : f_inner(phi,x,n),1000,0,pi))
