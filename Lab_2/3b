@@ -19,7 +19,7 @@ def V(u):
                  c = ((z-l*m)**2 + r**2)**0.5 #terms under root in denominator
                       
                  output = (k*e**-(m**2))/((n**2)*c)
-                 V_output = np.append(list,output)#adding results to list
+                 V_output = np.append(V_output,output)#adding results to list
                  
                  
     return V_output       
