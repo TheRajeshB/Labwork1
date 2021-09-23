@@ -38,7 +38,7 @@ def simp(f,a,b,N):
     
      sum_odd = 0.0
      sum_even = 0.0
-     initial_sum = f(a) + f(b)
+     initial_sum = np.add(f(a) ,f(b))
     
      trap_area=[]
     
