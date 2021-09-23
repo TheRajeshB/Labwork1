@@ -8,13 +8,13 @@ import matplotlib.pyplot as plt
 
 def V(u):
     V_output=np.array([]) #list to store output of function
-    for z in np.linspace(-5,5,100):#range of values for z
-        for r in np.linspace(0.25,5,100):#range of values for r
+    for z in np.linspace(-0.005,0.005,100):#range of values for z in 'm'
+        for r in np.linspace(0.00025,0.005,100):#range of values for r
                  Q= 10**-13
                  m = tan(u)
                  n = cos(u)
                  epsilon = 8.854e-12 #epsilon-nought in calculation of electrostatic constant
-                 l = 1 #l in mm
+                 l = 0.001 #l in mm
                  k = Q/(4*pi*epsilon)
                  c = ((z-l*m)**2 + r**2)**0.5 #terms under root in denominator
                       
@@ -29,6 +29,7 @@ def V(u):
     
 
 
+
 #fix to simpsons
  
 def simp(f,a,b,N):
@@ -38,7 +39,7 @@ def simp(f,a,b,N):
     
      sum_odd = 0.0
      sum_even = 0.0
-     initial_sum = np.add(f(a) ,f(b))
+     initial_sum = f(a)+f(b)
     
      trap_area=[]
     
@@ -60,5 +61,5 @@ def simp(f,a,b,N):
      
 
 
-print(simp(V,-pi/2,pi/2,9))
+print((simp(V,-pi/2,pi/2,9)))
 
