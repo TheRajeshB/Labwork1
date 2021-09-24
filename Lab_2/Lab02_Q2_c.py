@@ -2,7 +2,7 @@
 
 @author: Gabriel Bailey
 
-This code will calculate definite integrals using Trapezoidal and Simpsons's rules for integration.
+This code will create a surface plot of u for m=3, n=2, for R<=1, given the z = 11.620.
 """
 
 import numpy as np
