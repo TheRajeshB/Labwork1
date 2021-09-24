@@ -54,6 +54,9 @@ ax.set_ylabel('z')
 ax.set_zlabel('V')
 
 # Add a color bar which maps values to colors.
-fig.colorbar(surf, shrink=0.5, aspect=5)
+fig.subplots_adjust(right=0.82)
+cbar_ax = fig.add_axes([0.85, 0.15, 0.05, 0.7])
+fig.colorbar(surf, cax=cbar_ax)
+#fig.colorbar(surf, shrink=0.5, aspect=5)
 fig.suptitle('Electrostatic Potential over r and z')
 plt.show()
