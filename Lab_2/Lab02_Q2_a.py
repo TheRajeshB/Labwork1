@@ -8,7 +8,7 @@ This code will calculate definite integrals using Trapezoidal and Simpsons's rul
 from time import time
 from scipy.constants import pi
 #import our functions for integration with Trapezoidal and Simpsons's rules:
-from IntegrationFunctions import trap_integrate, simp_integrate
+from Lab02_IntegrationFunctions import trap_integrate, simp_integrate
 
 #The function we will be integrating over:
 def f(x):

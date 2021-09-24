@@ -6,7 +6,7 @@ This code will create a surface plot of u for m=3, n=2, for R<=1, given the z = 
 """
 
 import numpy as np
-from IntegrationFunctions import J
+from Lab02_IntegrationFunctions import J
 import matplotlib.pyplot as plt
 from matplotlib import cm
 import colorcet as cc

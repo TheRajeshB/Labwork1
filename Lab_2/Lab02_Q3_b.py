@@ -13,7 +13,7 @@ from scipy.special import kn
 import matplotlib.pyplot as plt
 from matplotlib import cm
 from matplotlib.ticker import LinearLocator
-from IntegrationFunctions import simp_integrate
+from Lab02_IntegrationFunctions import simp_integrate
 
 # The part of V that is inside the integral:
 def V(r,z,u):

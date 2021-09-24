@@ -7,7 +7,7 @@ This code will calculate the 0th, 3rd, and 5th order Bessel functions between 0 
 
 import numpy as np
 from scipy.special import jv, kn
-from IntegrationFunctions import J # Where the Bessel function is defined
+from Lab02_IntegrationFunctions import J # Where the Bessel function is defined
 import matplotlib.pyplot as plt
 
 #Create the x values
