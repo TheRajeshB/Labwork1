@@ -26,12 +26,29 @@ y = sp.exp(-x**2)
 dx = sp.diff(y, x)
 exact = dx.evalf(subs={x: x_val})
 
-der_results = np.empty([3,17])
-for i in range(17):
-    h = 10**(-i)
-    der_results[0][16-i] = h
-    der_results[1][16-i] = fd_derivative(f,x_val,h)
-    der_results[2][16-i] = abs(der_results[1][16-i] - exact)
+hs = np.empty(17)
+fd_val = np.empty(17)
+fd_diff = np.empty(17)
+cd_diff = np.empty(17)
+
+print("h,fd value,fd error")
+for i in range(0,17): #i = 16-i
+    h = 10**(i-16)
+    hs[i] = h
+    fd_diff[i] = abs(fd_derivative(f,x_val,h) - exact)
+    cd_diff[i] = abs(cd_derivative(f,x_val,h) - exact)
+    print(hs[i],',',fd_derivative(f,x_val,h),',',fd_diff[i])
 
 
-print(der_results)
+#Plot absolute difference from scipy Bessel function values
+plt.figure()
+plt.plot(hs, fd_diff, label = "Forward Difference Error")
+plt.plot(hs, cd_diff, label = "Central Difference Error")
+plt.xscale('log')
+plt.yscale('log')
+plt.legend()
+plt.xlabel('h')
+plt.ylabel('Absolute Error')
+plt.title('Errors for Derivative of e^(-x^2) at x=0.5')  
+
+plt.show()
