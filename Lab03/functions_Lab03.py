@@ -80,4 +80,7 @@ def gaussxw(N):
 
 def gaussxwab(N,a,b):
     x,w = gaussxw(N)
-    return 0.5*(b-a)*x+0.5*(b+a),0.5*(b-a)*w
+    return 0.5*(b-a)*x+0.5*(b+a), 0.5*(b-a)*w
+
+def gaussxwab_convert(x,w,a,b):
+    return 0.5*(b-a)*x+0.5*(b+a), 0.5*(b-a)*w
