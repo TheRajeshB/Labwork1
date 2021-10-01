@@ -5,9 +5,7 @@
 This code will calculate derivatives with the forward difference and centered difference methods as well as their errors over a variety of values for h. It will output a plot of the errors and print the results for forward difference in a csv table.
 """
 import numpy as np
-#import sympy as sp
-from scipy.special import jv, kn
-#from Lab02_IntegrationFunctions import J # Where the Bessel function is defined
+#import sympy as sp # Optional
 import matplotlib.pyplot as plt
 
 #The function in question
@@ -30,7 +28,7 @@ def cd_derivative(f,x,h):
 x_val = 0.5
 exact = dfdx(x_val)
 
-#Calculate the actual value generally using sympy
+#Calculate the actual value generally using sympy (optional)
 '''x = sp.Symbol('x')
 y = sp.exp(-x**2)
 dx = sp.diff(y, x)
@@ -52,7 +50,6 @@ for i in range(0,17):
 
 
 #Plot errors of the two methods on the same plot
-#plt.figure()
 fig = plt.figure(figsize=[10,5])
 ax = fig.add_subplot(1,1,1)
 ax.plot(hs, fd_diff, label = "Forward Difference Error")

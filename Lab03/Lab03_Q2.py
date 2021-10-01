@@ -6,15 +6,19 @@ This code will calculate the period of a spring using gaussian quadrature with s
 """
 
 import numpy as np
-#import sympy as sp
 from scipy.constants import c, pi
 from functions_Lab03 import gaussxw, gaussxwab, gaussxwab_convert
 import matplotlib.pyplot as plt
 
+# a function to calculate the velocity of a spring
+#  at position x
+#  with initial (0 velocity) position x0
+#  with spring constant k
+#  and mass m
 def g(x,x0,k,m):
-    #print(k*(x0**2-x**2)*(2*m*c**2 + k*(x0**2-x**2)/2), 2*m*c**2)
     return c*( k*(x0**2-x**2)*(2*m*c**2 + k*(x0**2-x**2)/2) / (2*(m*c**2 + k*(x0**2-x**2)/2)**2) )**(1/2)
 
+# Calculates T using Gaussian quadrature for the integral
 def T_details(x0, k, m, N):
     x,w = gaussxwab(N,0,x0)
     gk, wgk = np.empty(N), np.empty(N)
@@ -25,40 +29,20 @@ def T_details(x0, k, m, N):
         sum += wgk[i]
     return sum, x, gk, wgk
 
+# Set constants
 x0 = 0.01   # m
 m = 1       # kg
 k = 12      # N/m
+
+# Calculate the period
 T8, x8, gk8, wgk8 = T_details(x0,k,m,8)
 T16, x16, gk16, wgk16 = T_details(x0,k,m,16)
 T32 = T_details(x0,k,m,32)[0]
 T_class = 2*pi*(m/k)**(1/2)
 
-
-# Testing our Gaussian quadrature method against our other methods:
-
-#from functions_Lab03 import symb_integrate, trap_integrate, simp_integrate
-# def g_int(x):
-#     return 4/g(x,x0,k,m)
-# x00 = 10**(-15)
-
-# Ttrap = trap_integrate(g_int,100000000, 0, x0-x00)
-# print(Ttrap)
-# 1.8265933061561042 for N = 100000000
-
-# Tsimp = simp_integrate(g_int,100000000, 0, x0-x00)
-# print(Tsimp)
-# 1.8223053758301062 for N = 100000000
-
-# Tsymb = symb_integrate(g_int, 0, x0) doesn't work at all
-# print(Tsymb)
-
-#2.0419674852319942**-17 value from wolfram alpha
-#-0.023094 from wa 2nd try
-#0.023430709023252595 from sympy
-
 # Fractional error estimation
-fra_err8 = abs((T16-T8)/T8)
-fra_err16 = abs((T32-T16)/T16)
+fra_err8 = abs((T16-T8)/T16)
+fra_err16 = abs((T32-T16)/T32)
 
 # Print the results
 print("Period (classical):", T_class,"s")
@@ -94,21 +78,21 @@ ax.set_title('Plot of Weighted Values for 4w_k/g_k for x0=1cm, m=1kg, k=12N/m')
 plt.show()
 
 # Start of part b
-
 xc=m*k*c**2
 
 # Start of part c
-
 T200, x200, gk200, wgk200 = T_details(x0,k,m,200)
 T400 = T_details(x0,k,m,400)[0]
-fra_err200 = abs((T400-T200)/T200)
+fra_err200 = abs((T400-T200)/T400)
 
 print("Period with N = 200:",T200,"s")
 print("Relative error estimated   :",fra_err200)
 
+# Calculate samples locations and weights for N = 200
 N = 200
 x_gen, weights = gaussxw(N)
 
+# Fast function to calculate period many times using the same locations and weights
 def T(x0):
     x, w = gaussxwab_convert(x_gen,weights,0,x0)
     sum = 0.0
@@ -122,6 +106,7 @@ Ts = np.empty(m)
 for i in range(m):
     Ts[i] = T(xs[i])
 
+# Plot the results and the classical and relativistic limits
 fig3 = plt.figure(figsize=[10,5])
 ax = fig3.add_subplot(1,1,1)
 ax.plot(xs, Ts, 'o-', label = "Calculated Period")
