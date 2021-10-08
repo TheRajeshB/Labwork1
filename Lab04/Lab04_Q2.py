@@ -7,7 +7,7 @@ This code will calculate the eigenvalues for an electron in an energy well V(x) 
 
 import numpy as np
 from scipy.constants import pi,electron_volt,physical_constants,electron_mass
-from functions_Lab03 import simp_integrate
+from Lab04_functions import simp_integrate
 import matplotlib.pyplot as plt
 
 # Define constants
