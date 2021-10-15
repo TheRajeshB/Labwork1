@@ -6,24 +6,15 @@ This code will calculate the discrete fourier transform of a square wave, sawtoo
 '''
 import numpy as np
 import matplotlib.pyplot as plt
-from  numpy import  zeros 
 from  cmath  import  exp,pi 
 
-# From textbooks dft.py
-def  dft(y): 
-    N =  len(y) 
-    c  =  zeros(N//2+1,complex) 
-    for k  in  range(N//2+1): 
-        for  n  in  range(N): 
-            c[k] += y[n]*exp(-2j*pi*k*n/N) 
-    return  c
+# Constants
+N = 1000
+x = np.linspace(0,N,N)
 
 # Generates a 1-cycle square wave
 def squarewave(x):
-    y = np.ones(len(x))
-    for i in range(len(x)//2,len(x)):
-        y[i] = -1
-    return y
+    return np.where(x < N//2,-1,1)
 
 # Generates 1(?) cycle of a sawtooth wave
 def sawtooth(x):
@@ -35,7 +26,7 @@ def mod_sin(x):
     return np.sin(pi*x/X)*np.sin(20*pi*x/X)
 
 # Plot the results
-def result_plot(x,y,c,name):
+def result_plot(x,y,f,c,name):
     fig_test = plt.figure()
     ax_test = fig_test.add_subplot(1,1,1)
     ax_test.plot(x,y)
@@ -43,10 +34,12 @@ def result_plot(x,y,c,name):
     ax_test.set_title(name)
     ax_test.set_xlabel('Time (s)')
     ax_test.set_ylabel('Amplitude')
-    
+
+    bot = np.zeros(len(f))
     fig = plt.figure(figsize=[10,5])
     ax = fig.add_subplot(1,1,1)
-    ax.bar(range(len(c)), c, width=1.3)
+    ax.plot(f, c)
+    ax.fill_between(f, bot, c)
     ax.set_title('DFT of '+name) 
     ax.set_xlabel('Frequency (Hz)')
     ax.set_ylabel('Amplitude')
@@ -54,19 +47,19 @@ def result_plot(x,y,c,name):
     plt.show()
 
 #Part a a
-N = 1000
-x = np.linspace(0,N,N)
-
 y = squarewave(x)
-c = abs(dft(y))
-result_plot(x,y,c,"Sqaure Wave")
+c = abs(np.fft.rfft(y))
+f = np.fft.rfftfreq(N)
+result_plot(x,y,f,c,"Square Wave")
 
 #Part a b
 y = sawtooth(x)
-c = abs(dft(y))
-result_plot(x,y,c,"Sawtooth Wave")
+c = abs(np.fft.rfft(y))
+f = np.fft.rfftfreq(N)
+result_plot(x,y,f,c,"Sawtooth Wave")
 
 #Part a c
 y = mod_sin(x)
-c = abs(dft(y))
-result_plot(x,y,c,"Modulated Sine Wave")
+c = abs(np.fft.rfft(y))
+f = np.fft.rfftfreq(N)
+result_plot(x,y,f,c,"Modulated Sine Wave")
