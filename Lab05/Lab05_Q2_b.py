@@ -20,7 +20,7 @@ def create_time_plot(t,channel_0,channel_1,filtered =''):
         axs[i].set_xlabel('Time (s)')
         axs[i].set_ylabel('Sound Pressure')
 
-    fig.suptitle('Air Pressure of GraviteaTime.wav over Time '+filtered, fontsize=16)
+    fig.suptitle('Air Pressure of GraviteaTime.wav over Time '+filtered)
 
 def create_freq_plot(f,channel_0,channel_1,filtered =''):
     fig, axs = plt.subplots(2, 1, constrained_layout=True)
@@ -30,7 +30,19 @@ def create_freq_plot(f,channel_0,channel_1,filtered =''):
         axs[i].set_xlabel('Frequency (Hz)')
         axs[i].set_ylabel('Amplitude')
 
-    fig.suptitle('Frequency Distribution of GraviteaTime.wav '+filtered, fontsize=16)
+    fig.suptitle('Frequency Distribution of GraviteaTime.wav '+filtered)
+
+def create_time_plot_comparison(t,channels,filtered =''):
+    fig, axs = plt.subplots(2, 2, constrained_layout=True)
+    for i in range(2):
+        for j in range(2):
+            axs[i][j].plot(t, channels[i][j])
+            axs[i][j].set_xlim(2,2.05)
+            axs[i][j].set_title('Channel '+str(i))
+            axs[i][j].set_xlabel('Time (s)')
+            axs[i][j].set_ylabel('Sound Pressure')
+
+    fig.suptitle('Air Pressure Comparison (Original vs Filtered)')
 
 
 # read the data
@@ -46,23 +58,24 @@ timestep = 1/sample
 time = N/sample
 
 t = np.linspace(0,time,N)
-create_time_plot(t,channel_0,channel_1)
+create_time_plot(t,channel_0,channel_1,"Original")
 
 f = np.fft.rfftfreq(N,timestep)
 c0 = np.fft.rfft(channel_0)
 c1 = np.fft.rfft(channel_1)
-#create_freq_plot(f,c0,c1)
+create_freq_plot(f,c0,c1,"Original")
 
 # Just lazily finding the index of 880Hz with binary search
 cutoff = bisect.bisect_left(f, 880)
 c0[cutoff:] = 0
 c1[cutoff:] = 0
 
-#create_freq_plot(f,c0,c1)
+create_freq_plot(f,c0,c1,"Filtered")
 channel_0_out = np.fft.irfft(c0)
 channel_1_out = np.fft.irfft(c1)
 
 create_time_plot(t,channel_0_out,channel_1_out,'Filtered')
+create_time_plot_comparison(t,[[channel_0,channel_0_out],[channel_1,channel_1_out]])
 plt.show()
 
 # this creates an empty array data_out with the same shape as "data"
