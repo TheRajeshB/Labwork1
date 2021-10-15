@@ -37,7 +37,7 @@ def result_plot(x,y,f,c,name):
 
     bot = np.empty(len(f))
     bot[:] = -0.5 # To make c=0 more visible
-    fig = plt.figure(figsize=[10,5])
+    fig = plt.figure(figsize=[10,3])
     ax = fig.add_subplot(1,1,1)
     #ax.plot(f, c)
     ax.fill_between(f, bot, c)
@@ -45,7 +45,7 @@ def result_plot(x,y,f,c,name):
     ax.set_title('DFT of '+name) 
     ax.set_xlabel('Frequency (Hz)')
     ax.set_ylabel('Amplitude')
-     
+    plt.tight_layout()
     plt.show()
 
 #Part a a

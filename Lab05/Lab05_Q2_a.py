@@ -14,8 +14,8 @@ from Lab05_functions import T_details
 m = 1       # kg
 k = 12      # N/m
 xc=np.sqrt(m/k)*c
-N = [5000,100000,300000]
-time = [50,50,150]
+N = [5000,200000,1000000]
+time = [50,50,240]
 x0 = [1,xc,10*xc]
 labels = ["1 m", "x_c", "10x_c"]
 colors = [['blue','darkblue'],['orange','darkorange'],['green','darkgreen']]
@@ -36,6 +36,11 @@ def euler_cromer(x0,N,time):
 
 # Adds a time-domain plot. Last 3 arguments are titles/formatting
 def add_time_plot(t, x, v, N, time, startname, case):
+    # To reduce lag:
+    t = t[::10]
+    x = x[::10]
+    v = v[::10]
+
     fig_time = plt.figure(figsize=[10,6])
     ax_time = fig_time.add_subplot(1,1,1)
     ax_time.plot(t,x, label = 'Position (m)')
@@ -43,14 +48,14 @@ def add_time_plot(t, x, v, N, time, startname, case):
     ax_time.set_xlabel('Time (s)')
     ax_time.set_ylabel('Position (m)\nVelocity (m/s)')
     #ax_vis.set_yscale('log')
-    ax_time.set_title('Position of Particle on Relativistic\n Spring over Time (Case {}:\nx_0 = {}, N = {}, dt = {}'.format(case,startname,N,time/N))
+    ax_time.set_title('Position of Particle on Relativistic\n Spring over Time (Case {}:\nx_0 = {}, N = {}, dt = {})'.format(case,startname,N,time/N))
     ax_time.legend()#title="Starting position")
 
 # Adds a frequency-domain plot. Last 4 arguments are titles/formatting
 def add_freq_plot(ax_freq, f, c, T_expected, N, time, startname, case, colors, title):
-    maxc = np.max(c)
-    ax_freq.plot(f[:N//2],abs(c[:N//2]/maxc), label = 'Case {}: x_0 = {}, N = {}, dt = {}'.format(case,startname,N,time/N),c=colors[0])
-    ax_freq.axvline(x=1/T_expected, label='Case {} Predicted Frequency'.format(case), c=colors[1],ls = '--')
+    maxc = np.max(abs(c))
+    ax_freq.plot(f,abs(c/maxc), label = 'Case {}: x_0 = {}, N = {}, dt = {}'.format(case,startname,N,time/N),c=colors[0])
+    ax_freq.axvline(x=1/T_expected, label='Case {} Predicted Frequency'.format(case), c=colors[1],ls = ':')
     ax_freq.set_xlabel('Frequency (Hz)')
     ax_freq.set_xlim(0,5)
     ax_freq.set_ylabel('Magnitude (normalized to max of 1)')
@@ -61,8 +66,12 @@ def add_freq_plot(ax_freq, f, c, T_expected, N, time, startname, case, colors, t
 # Prints the relative difference due to the non-stability of the system over the course of the simulation
 def print_errors(x,v,n,i):
     print("Case {} nonstability:".format(i))
-    print("Position relative error: ",abs(np.max(x[-n//10:])-np.max(x[:n//10]))/np.max(x[:n//10]))
-    print("Velocity relative error: ",abs(np.max(v[-n//10:])-np.max(v[:n//10]))/np.max(v[:n//10]))
+    lastx = np.max(abs(x[-n//20:]))
+    initx = np.max(abs(x[:n//20]))
+    print("Position relative error: ",abs((lastx-initx)/initx))
+    lastv = np.max(abs(v[-n//20:]))
+    initv = np.max(abs(v[:n//20]))
+    print("Velocity relative error: ",abs((lastv-initv)/initv))
 
 # Initialize nested lists to store the 3 cases:
 t =[[0],[0],[0]]
@@ -77,23 +86,23 @@ for i in range(3):
     t[i] = np.linspace(0,time[i],N[i])
     x[i],v[i] = euler_cromer(x0[i], N[i], time[i])
     # Uncomment to see time plots:
-    # print_errors(x[i],v[i],n[i],i+1)
-    # add_time_plot(t[i], x[i], v[i], N[i], time[i], labels[i], i+1)
+#     print_errors(x[i],v[i],N[i],i+1)
+#     add_time_plot(t[i], x[i], v[i], N[i], time[i], labels[i], i+1)
 # plt.show()
 
-fig_freqx = plt.figure(figsize=[10,6])
+fig_freqx = plt.figure(figsize=[10,4])
 ax_freqx = fig_freqx.add_subplot(1,1,1)
 for i in range(0,3):
     cx[i] = np.fft.rfft(x[i])
-    f[i] = np.fft.fftfreq(N[i],time[i]/N[i])
+    f[i] = np.fft.rfftfreq(N[i],time[i]/N[i])
     T_predicted[i] = T_details(x0[i],k,m,32)[0]
     add_freq_plot(ax_freqx,f[i],cx[i],T_predicted[i],N[i],time[i],labels[i],i+1,colors[i], "Position")
 
-fig_freqv = plt.figure(figsize=[10,6])
+fig_freqv = plt.figure(figsize=[10,4])
 ax_freqv = fig_freqv.add_subplot(1,1,1)
 for i in range(0,3):
     cv[i] = np.fft.rfft(v[i])
-    f[i] = np.fft.fftfreq(N[i],time[i]/N[i])
+    f[i] = np.fft.rfftfreq(N[i],time[i]/N[i])
     #T_predicted[i] = T_details(x0[i],k,m,32)[0] #Uncomment if above loop is commented out
     add_freq_plot(ax_freqv,f[i],cv[i],T_predicted[i],N[i],time[i],labels[i],i+1,colors[i], "Velocity")
 
