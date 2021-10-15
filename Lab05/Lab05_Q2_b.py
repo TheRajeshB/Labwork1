@@ -53,7 +53,7 @@ c0 = np.fft.rfft(channel_0)
 c1 = np.fft.rfft(channel_1)
 #create_freq_plot(f,c0,c1)
 
-# Just lazily finding the index of 880Hz
+# Just lazily finding the index of 880Hz with binary search
 cutoff = bisect.bisect_left(f, 880)
 c0[cutoff:] = 0
 c1[cutoff:] = 0
@@ -72,18 +72,6 @@ data_out = empty(data.shape, dtype = data.dtype)
 data_out[:, 0] = channel_0_out
 data_out[:, 1] = channel_1_out
 write('GraviteaTime_lpf.wav', sample, data_out)
-
-
-    
-
-
-    
-def print_errors(x,v,n,i):
-    print("Case {} nonstability:".format(i))
-    print("Position relative error: ",abs(np.max(x[-n//10:])-np.max(x[:n//10]))/np.max(x[:n//10]))
-    print("Velocity relative error: ",abs(np.max(v[-n//10:])-np.max(v[:n//10]))/np.max(v[:n//10]))
-
-
 
 print("Done")
 
