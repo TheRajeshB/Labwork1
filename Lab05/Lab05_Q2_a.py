@@ -2,7 +2,7 @@
 
 @author: Gabriel Bailey
 
-This code will calculate the period of a spring using gaussian quadrature with several values of N, and will then print out the results and there errors as well as create 3 plots: one of what each sample point evaluates to, one of those values after weighting, and on that compares the results of our calculation with classical and relativistic limits.
+This code will simulate a particle on a relativistic spring using the Euler-Cromer method in 3 cases, and then will plot out the position and velocity of the particles over time, print the error due to instability, and finally plot the frequency-domain plots for the simulation and compare it to the predicted frequencies from gaussian integration.
 """
 
 import numpy as np
@@ -35,21 +35,21 @@ def euler_cromer(x0,N,time):
     return x, v
 
 # Adds a time-domain plot. Last 3 arguments are titles/formatting
-def add_time_plot(t, x, v, N, time, startname, case):
+def create_time_plot(t, x, v, N, time, startname, case):
     # To reduce lag:
     t = t[::10]
     x = x[::10]
     v = v[::10]
 
-    fig_time = plt.figure(figsize=[10,6])
+    fig_time = plt.figure(figsize=[10,4])
     ax_time = fig_time.add_subplot(1,1,1)
     ax_time.plot(t,x, label = 'Position (m)')
     ax_time.plot(t,v, label = 'Velocity (m/s)')
     ax_time.set_xlabel('Time (s)')
     ax_time.set_ylabel('Position (m)\nVelocity (m/s)')
-    #ax_vis.set_yscale('log')
-    ax_time.set_title('Position of Particle on Relativistic\n Spring over Time (Case {}:\nx_0 = {}, N = {}, dt = {})'.format(case,startname,N,time/N))
-    ax_time.legend()#title="Starting position")
+    ax_time.set_title('Position of Particle on Relativistic\n Spring over Time \n(Case {}: x_0 = {}, N = {}, dt = {})'.format(case,startname,N,time/N))
+    ax_time.legend()
+    plt.tight_layout()
 
 # Adds a frequency-domain plot. Last 4 arguments are titles/formatting
 def add_freq_plot(ax_freq, f, c, T_expected, N, time, startname, case, colors, title):
@@ -59,9 +59,8 @@ def add_freq_plot(ax_freq, f, c, T_expected, N, time, startname, case, colors, t
     ax_freq.set_xlabel('Frequency (Hz)')
     ax_freq.set_xlim(0,5)
     ax_freq.set_ylabel('Magnitude (normalized to max of 1)')
-    #ax_vis.set_yscale('log')
     ax_freq.set_title('Frequency of '+title+' of Particle on Relativistic Spring')
-    ax_freq.legend()#title="Starting position")
+    ax_freq.legend()
     
 # Prints the relative difference due to the non-stability of the system over the course of the simulation
 def print_errors(x,v,n,i):
@@ -82,14 +81,17 @@ cv= [[0],[0],[0]]
 f= [[0],[0],[0]]
 T_predicted =[[0],[0],[0]]
 
+# Print out errors and plot positions and velocities
 for i in range(3):
     t[i] = np.linspace(0,time[i],N[i])
     x[i],v[i] = euler_cromer(x0[i], N[i], time[i])
     # Uncomment to see time plots:
-#     print_errors(x[i],v[i],N[i],i+1)
-#     add_time_plot(t[i], x[i], v[i], N[i], time[i], labels[i], i+1)
-# plt.show()
+    print_errors(x[i],v[i],N[i],i+1)
+    create_time_plot(t[i], x[i], v[i], N[i], time[i], labels[i], i+1)
 
+plt.show()
+
+# Calculate and plot the fft for x
 fig_freqx = plt.figure(figsize=[10,4])
 ax_freqx = fig_freqx.add_subplot(1,1,1)
 for i in range(0,3):
@@ -98,6 +100,7 @@ for i in range(0,3):
     T_predicted[i] = T_details(x0[i],k,m,32)[0]
     add_freq_plot(ax_freqx,f[i],cx[i],T_predicted[i],N[i],time[i],labels[i],i+1,colors[i], "Position")
 
+# Calculate and plot the fft for v
 fig_freqv = plt.figure(figsize=[10,4])
 ax_freqv = fig_freqv.add_subplot(1,1,1)
 for i in range(0,3):
