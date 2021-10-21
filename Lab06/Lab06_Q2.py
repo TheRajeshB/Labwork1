@@ -7,9 +7,10 @@ This code will simulate the motion of a building using the verlet method plottin
 import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.ticker import MultipleLocator
-import colorsys
+from Lab06_functions import adjust_lightness, find_freq_fft, find_freq_lazy
 
-def generateA(N):
+# Generates the matrix for this problem manually, row by row
+def generate_A(N):
     A = np.zeros((N,N))
     for i in range(N):
         A[i][i] = -2
@@ -19,14 +20,15 @@ def generateA(N):
             A[i][i+1] = 1
     return A
 
-def simulate_building(N,maxtime,h,x0):
+# Simulates the displacement of floors of a building over time using the Verlet method
+def simulate_building(num_floors,maxtime,h,x0,km):
     steps = int(maxtime/h)
-    time = np.linspace(0,maxtime,steps)
-    x = np.zeros((2*steps,N))
-    x[0][0] = x0
-    v = np.zeros((2*steps,N))
-    A = km*generateA(N)
-    #first step
+    time = np.linspace(0,maxtime,steps) # The time for graphing
+    x = np.zeros((2*steps,num_floors)) # The displacement of the floors (includes half steps)
+    x[0] = x0
+    v = np.zeros((2*steps,num_floors)) # The velocities of the floors (includes half steps)
+    A = km*generate_A(num_floors) # The coefficient matrix
+    #first half-step
     v[1] = v[0]+1/2*h*A.dot(x[0])
 
     for t in range(2,2*steps,2):
@@ -34,53 +36,74 @@ def simulate_building(N,maxtime,h,x0):
         k = h*A.dot(x[t])
         v[t] = v[t-1]+1/2*k
         v[t+1] = v[t-1] + k
-        # if t < 6:
-        #     print(x[t])
-        #     print(k)
-        #     print(v[t])
 
     return time, x, v
 
-# Define all the constants for this problem (all in m)
+# Plot the results
+def plot_building(num_floors,t,x,freq = None):
+    fig = plt.figure(figsize=[10,5])
+    ax = fig.add_subplot(1,1,1)
+    colors = plt.rcParams['axes.prop_cycle'].by_key()['color']
+    for i in range(num_floors):
+        ax.axhline(y=10*i, linestyle=':', color = adjust_lightness(colors[i],0.7))
+        ax.plot(t, x[::2,i].T+10*i)
+        
+    ax.grid(which='both', axis='y')
+    ml = MultipleLocator(10)
+    ax.yaxis.set_minor_locator(ml)
+    ax.set_title('Vibrations of a Building with {} Floors\n (dotted line is 0 for each floor)'.format(num_floors)) 
+    ax.set_xlabel('Time (s)')
+    ax.set_ylabel('x displacement for floor 0 (cm) ')
+    if freq:
+        ax.set_title('Vibrations of a Building with {} Floors\n (Normal Mode {})'.format(num_floors,freq[2]))
+        ax.text(0.1,num_floors*10-15,'Predicted  Frequency: {:.4f} Hz\nSimulated Frequency: {:.4f} Hz'.format(freq[0],freq[1])) 
+        ax.set_xlim([0, 1])
+    return ax
+    
+# Define all the constants for this problem
 km = 400 #rad s^-2
 dt = 1/1000 #s
 maxtime = 1 #s
-x0 = 10 # cm
-N = 10
-t10,x10,v10 = simulate_building(N,maxtime,dt,x0)
 
-#print(x10[:20:2,:].T)
+num_floors = 10 
+x0 = np.zeros((1,num_floors))
+x0[0][0] = 10 # cm
 
-# From https://stackoverflow.com/a/49601444
-# Just adjusts a colors lightness
-def adjust_lightness(color, amount=0.5):
-    import matplotlib.colors as mc
-    import colorsys
-    try:
-        c = mc.cnames[color]
-    except:
-        c = color
-    c = colorsys.rgb_to_hls(*mc.to_rgb(c))
-    return colorsys.hls_to_rgb(c[0], max(0, min(1, amount * c[1])), c[2])
+t10,x10,v10 = simulate_building(num_floors,maxtime,dt,x0,km)
+plot_building(num_floors,t10,x10)
 
-# Plot the results
-fig = plt.figure(figsize=[10,5])
-ax = fig.add_subplot(1,1,1)
-colors = plt.rcParams['axes.prop_cycle'].by_key()['color']
-for i in range(N):
-    ax.axhline(y=10*i, linestyle=':', color = adjust_lightness(colors[i],0.7))
-    ax.plot(t10, x10[::2,i].T+10*i)
-    
-#ax.set_xlim( -0.05, 0.05)
-ax.grid(which='both', axis='y')
-ml = MultipleLocator(10)
-ax.yaxis.set_minor_locator(ml)
-#ax.tick_params(axis='x', which='minor', bottom=False)
-ax.set_title('Vibrations of a Building with {} Floors\n (dotted line is 0 for each floor)'.format(N)) 
-ax.set_xlabel('Time (s)')
-ax.set_ylabel('x displacement for floor 0 (cm) ')
-    
+num_floors = 3
+x0 = np.zeros((1,num_floors))
+x0[0][0] = 10 # cm
+
+t3,x3,v3 = simulate_building(num_floors,maxtime,dt,x0,km)
+plot_building(num_floors,t3,x3)
 plt.show()
 
 #Part b
+num_floors = 3
+A3 = km*generate_A(num_floors)
 
+# Calculate the eigenvalues and eigenvectors
+eigvals, eigvecs = np.linalg.eig(A3)
+# np docs: "the column v[:,i] is the eigenvector corresponding to the eigenvalue w[i]"
+# Order them in terms of frequency(energy?) (from the eigenvalues)
+eigorder = np.argsort(abs(eigvals)) # An array of indices such that eigvals[eigorder] yields a sorted eigvals
+eigvals = eigvals[eigorder]
+eigvecs = eigvecs[:,eigorder] # Apply it to the column order of eigvecs
+
+# eigenvals = -(angular frequency)^2 = -(2*pi*frequency)^2
+freq_predicted = np.sqrt(-eigvals)/(2*np.pi)
+
+# Simulate the 3 normal modes
+for i in range(3):
+    maxtime = 100
+    x0 = eigvecs[:,i]
+    t3,x3,v3 = simulate_building(num_floors,maxtime,dt,x0,km)
+    freq_lazy = find_freq_lazy(t3,x3[:,0])
+    freq_fft = find_freq_fft(maxtime,x3[:,0])
+    ax = plot_building(num_floors,t3,x3,[freq_predicted[i],freq_fft, i])
+    
+    print("Frequency for {}: {}\n Measured {:.4f} or {:.4f}".format(i, freq_predicted[i], freq_lazy, freq_fft))
+
+plt.show()
