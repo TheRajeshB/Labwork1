@@ -13,7 +13,7 @@ a = 0.1 #grid spacing in cm
 L = int(20/a) #number of grid-points for length of domain 
 W = int(8/a)  #number of grid points for width of domain  
 
-#length of sides of shape 
+#length of sides of domain 
 AB = 5 #in cm
 BC = 3 #in cm 
 CD = 10 #in cm 
@@ -34,14 +34,15 @@ BC_HA = np.linspace(10,0,int(HA/a)+1)
 phi = np.zeros([W+1,L+1],float)
 
 delta = 1.0 
-target = 10**-6
+target = 10**-6 #target accuracy 
 
-omega = 0.9
+
+
 
 # Initialize boundary conditions
 for i in range(W+1):
     for j in range(L+1):
-        if i==0 and 0<j<L:
+        if i==0 and 0<=j<=L:
             phi[i,j]= 10 #Boundary condition for HG
         
         elif j==0 and 0<i<W:
@@ -64,14 +65,19 @@ for i in range(W+1):
             
         elif i==80 and 150<j<200:
             phi[i,j] = BC_EF[j-150] #Boundary condition for EF
-            
-# Run simulation
-N = 100
-for n in range(N):
+
+
+def results(iterations,omega):
+ """functions that takes in number of iterations and omega, performs Gauss-Siedel relaxation with
+      replacements and over-realaxation for 
+     that number of iterations, and outputs result (in matrix form)  """  
+ for n in range(iterations):
+    
     delta = 0.0
     for i in range(W):
+        
         for j in range(L):
-            if i==0 and 0<j<L:
+            if i==0 and 0<=j<=L:
                 phi[i,j]= 10 #Boundary condition for HG
             
             elif j==0 and 0<i<W:
@@ -97,52 +103,24 @@ for n in range(N):
                 
             else:
                 phi[i, j] =  (1 + omega) * (phi[i+1, j] + phi[i-1, j] + phi[i, j+1] + phi[i, j-1])/4 - omega * phi[i, j]
+    
+ 
+ return np.flip(phi,0) #adjusting matrix to make origin at bottom left of domain
 
-phi = np.flip(phi,0)
+plt.pcolormesh(results(100,0.9),cmap='Greens')
+plt.title('Temperature distribution for omega =0.9')
+plt.xlabel('x(mm)')
+plt.ylabel('y(mm)')
+plt.colorbar()
+plt.show( )
 
-fig = plt.figure(figsize=[10,5])
-ax = fig.add_subplot(1,1,1)
-#im = ax.imshow(m1, interpolation='None')
-x_coords = np.linspace(0,20,L+1)
-y_coords = np.linspace(0,8,W+1)
-ax.contourf(x_coords,y_coords,phi)
-ax.set_title('Temperature Distrobution, omega = {}'.format(omega)) 
-ax.set_xlabel('x (cm)')
-ax.set_ylabel('y (cm)')
-#plt.colorbar(ax)
-plt.show()
-
-""" from matplotlib.animation import FuncAnimation, FFMpegWriter
-
-fig, ax = plt.subplots()
-ax.grid(which='both', axis='y')
-ax.set_title('Burger\'s Equation') 
-ax.set_xlabel('x')
-ax.set_ylabel('Value')
-xdata, ydata = [], []
-line, = plt.plot([], [])
-time_text = ax.text(0.1, 0.1, 'time = ', transform=ax.transAxes)
-
-def init():
-    ax.set_xlim(0, 2*pi)
-    ax.set_ylim(-2, 2)
-    time_text.set_text('time = ')
-    return line,
-
-def update(i):
-    i = int(i)
-    x = linspace(0, Lx, Nx)
-    y = u[:,i]
-    line.set_data(x, y)
-    time_text.set_text('time = {:1.2f}'.format(i*delta_t))
-    return line, time_text
-
-ani = FuncAnimation(fig, update, frames=Nt, interval=1,
-                    init_func=init, blit=True)
-
-# Save the animation (need ffmpeg)
-# f = 'Q3_vid.mp4' 
-# writervideo = FFMpegWriter(fps=60) 
-# ani.save(f, writer=writervideo)
-
-plt.show() """
+for x in np.arange(0,100,9):
+    plt.clf()
+    plt.pcolormesh(results(x,0.9),cmap='Greens')
+    plt.title('Tempreature distribution')
+    plt.xlabel('x(mm)')
+    plt.ylabel('y(mm)')
+    plt.colorbar()
+    plt.draw()
+    plt.pause(0.1)
+    
