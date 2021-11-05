@@ -38,9 +38,36 @@ target = 10**-6
 
 omega = 0.9
 
-
+# Initialize boundary conditions
+for i in range(W+1):
+    for j in range(L+1):
+        if i==0 and 0<j<L:
+            phi[i,j]= 10 #Boundary condition for HG
+        
+        elif j==0 and 0<i<W:
+            phi[i,j] = BC_HA[i] #Boundary condition for HA
             
-while delta > target:
+        elif j==200 and 0<i<W:
+            phi[i,j] = BC_GF[i] #Boundary condition for GF
+            
+        elif i == 80 and 0<j<50:
+            phi[i,j] = BC_AB[j] #Boundary condition for AB
+            
+        elif j == 50 and 50<i<80:
+            phi[i,j] = BC_CB[i-50] #Boundary condition for CB
+            
+        elif i == 50 and 50<j<150:
+            phi[i,j] = 7 #Boundary condition for CD
+        
+        elif j==150 and 50<i<80:
+            phi[i,j] = BC_DE[i-50] #Boundary condition for DE
+            
+        elif i==80 and 150<j<200:
+            phi[i,j] = BC_EF[j-150] #Boundary condition for EF
+            
+# Run simulation
+N = 100
+for n in range(N):
     delta = 0.0
     for i in range(W):
         for j in range(L):
@@ -50,7 +77,7 @@ while delta > target:
             elif j==0 and 0<i<W:
                 phi[i,j] = BC_HA[i] #Boundary condition for HA
                 
-            elif j==200 and 0<i<W:
+            elif j==200 and 0<i<W: 
                 phi[i,j] = BC_GF[i] #Boundary condition for GF
                 
             elif i == 80 and 0<j<50:
@@ -69,13 +96,53 @@ while delta > target:
                 phi[i,j] = BC_EF[j-150] #Boundary condition for EF
                 
             else:
-                new_phi =  (1 + omega) * (phi[i+1, j] + phi[i-1, j] + phi[i, j+1] + phi[i, j-1])/4 - omega * phi[i, j]
-                
-                
-                new_delta = np.abs(new_phi - phi[i, j])
-                delta = new_delta if new_delta > delta else delta
-                phi[i, j] = new_phi    
-   
-plt.contourf(phi)
-plt.colorbar()
+                phi[i, j] =  (1 + omega) * (phi[i+1, j] + phi[i-1, j] + phi[i, j+1] + phi[i, j-1])/4 - omega * phi[i, j]
+
+phi = np.flip(phi,0)
+
+fig = plt.figure(figsize=[10,5])
+ax = fig.add_subplot(1,1,1)
+#im = ax.imshow(m1, interpolation='None')
+x_coords = np.linspace(0,20,L+1)
+y_coords = np.linspace(0,8,W+1)
+ax.contourf(x_coords,y_coords,phi)
+ax.set_title('Temperature Distrobution, omega = {}'.format(omega)) 
+ax.set_xlabel('x (cm)')
+ax.set_ylabel('y (cm)')
+#plt.colorbar(ax)
 plt.show()
+
+""" from matplotlib.animation import FuncAnimation, FFMpegWriter
+
+fig, ax = plt.subplots()
+ax.grid(which='both', axis='y')
+ax.set_title('Burger\'s Equation') 
+ax.set_xlabel('x')
+ax.set_ylabel('Value')
+xdata, ydata = [], []
+line, = plt.plot([], [])
+time_text = ax.text(0.1, 0.1, 'time = ', transform=ax.transAxes)
+
+def init():
+    ax.set_xlim(0, 2*pi)
+    ax.set_ylim(-2, 2)
+    time_text.set_text('time = ')
+    return line,
+
+def update(i):
+    i = int(i)
+    x = linspace(0, Lx, Nx)
+    y = u[:,i]
+    line.set_data(x, y)
+    time_text.set_text('time = {:1.2f}'.format(i*delta_t))
+    return line, time_text
+
+ani = FuncAnimation(fig, update, frames=Nt, interval=1,
+                    init_func=init, blit=True)
+
+# Save the animation (need ffmpeg)
+# f = 'Q3_vid.mp4' 
+# writervideo = FFMpegWriter(fps=60) 
+# ani.save(f, writer=writervideo)
+
+plt.show() """
