@@ -17,8 +17,8 @@ import numpy as np
 from banded import banded
 
 compute_psi = True
-test = True
-case = 'a'
+test = False
+case = 'c'
 
 # Constants
 
@@ -58,7 +58,7 @@ def V_double(x):
     else:
         return np.inf
 
-if case == 'a':
+if case == 'b':
     V = V_square
     N = 3000
     x0 = L/5
@@ -131,12 +131,15 @@ h1_arr = np.full(P,h1)
 for i in range(len(h1_arr)):
     h1_arr[i] = h1_arr[i] + V(dis(i))
 H = np.diag(h1_arr,0) + np.diag(np.full(P-1,h2),-1) + np.diag(np.full(P-1,h2),1)
+
 # The internal part of the position integral
 def ener(psi,x):
     return psi[i].conj().T* H *psi[i]
 #  Computes the energy
 def compute_energy(psi,i):
-    return simp_integrate(lambda x : ener(psi,x), P-1, 0, P-1)*L/P
+    E = psi[i].conj().T* H *psi[i]
+    print(np.size(E,0),np.size(E,1))
+    return simp_integrate(lambda x : E[int(x)][int(x)], P-1, 0, P-1)*L/P
 
 # The internal part of the position integral
 def pos(psi,x):
@@ -156,6 +159,10 @@ print('normalization-1',compute_normalization(psi,0))
 psi[0] = psi0*psi[0]
 print('normalization 0',compute_normalization(psi,0))
 
+#comput energy
+
+print('energy 0',compute_energy(psi,0))
+
 
 # Calculate A & B matrices
 
@@ -169,8 +176,8 @@ b2 = h * hbar/(4*m*a**2) *1j
 a1_arr = np.full(P,a1)
 b1_arr = np.full(P,b1)
 for i in range(len(a1_arr)):
-    a1_arr[i] = a1_arr[i] + 1j/(2*hbar)*V(dis(i))
-    b1_arr[i] = b1_arr[i] - 1j/(2*hbar)*V(dis(i))
+    a1_arr[i] = a1_arr[i] - h*1j/(2*hbar)*V(dis(i))
+    b1_arr[i] = b1_arr[i] + h*1j/(2*hbar)*V(dis(i))
 
 # We defined A with the diagonals as rows so that we can use banded.py
 A = np.array([np.full(P,a2),a1_arr,np.full(P,a2)])
@@ -196,6 +203,7 @@ else:
 #print(psi)
 
 print('normalization N',compute_normalization(psi,N-1))
+print('energy N',compute_energy(psi,N-1))
 
 #Plot the results as an animation
 from matplotlib.animation import FuncAnimation, FFMpegWriter
