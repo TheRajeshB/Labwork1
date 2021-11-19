@@ -17,8 +17,8 @@ import numpy as np
 from banded import banded
 
 compute_psi = True
-test = False
-case = 'd'
+test = True
+case = 'a'
 
 # Constants
 
@@ -32,13 +32,42 @@ kappa = 500/L #m^-1
 P = 1024
 tau = 1e-18 #s
 N = 3000
+V = 'function'
+
+# Potential for a square well
+def V_square(x):
+    if -L/2 <= x <= L/2:
+        return 0
+    else:
+        return np.inf
+
+# Potential for a harmonic oscillator
+omega = 3e15 # rad/s
+def V_harm(x):
+    if -L/2 <= x <= L/2:
+        return 1/2*m*omega**2 * x**2
+    else:
+        return np.inf
+    
+# Potential for a Double well
+V0 = 6e-17 # J
+x1 = L/4
+def V_double(x):
+    if -L/2 <= x <= L/2:
+        return V0*(x**2/x1**2-1)**2
+    else:
+        return np.inf
+
 if case == 'a':
+    V = V_square
     N = 3000
     x0 = L/5
 elif case == 'c':
+    V = V_harm
     N = 4000
     x0 = L/5
 elif case == 'd':
+    V = V_double
     N = 6000
     x0 = L/3
 
@@ -64,12 +93,10 @@ def wave_abs(x):
     return val.conj()*val
 
 #psi0 = 1/symb_integrate(wave, -0.5*L, 0.5*L)
-psi0 = 1/simp_integrate(wave_abs, P*10, -0.5*L, 0.5*L)
+psi0 = 1/np.sqrt(simp_integrate(wave_abs, P*10, -0.5*L, 0.5*L))
 
 print('psi0', psi0)
 print('psi0 res', psi0*simp_integrate(wave_abs, P*10, -0.5*L, 0.5*L))
-
-
 
 #Converts index to distance
 def dis(i):
@@ -80,30 +107,6 @@ def ind(x):
     return int((x/L+1/2)*P)
     return int(np.round((x/L+1/2)*P))
 
-# Potential for a square well
-def V_square(x):
-    if -L/2 <= x <= L/2:
-        return 0
-    else:
-        return np.inf
-
-# Potential for a harmonic oscillator
-omega = 3e15 # rad/s
-def V_harm(x):
-    if -L/2 <= x <= L/2:
-        return 1/2*m*omega**2 * x**2
-    else:
-        return np.inf
-    
-# Potential for a Double well
-V0 = 6e-17 # J
-x1 = L/4
-def V_double(x):
-    if -L/2 <= x <= L/2:
-        return V0*(x**2/x1**2-1)**2
-    else:
-        return np.inf
-    
 
 # required functions
 
@@ -121,19 +124,33 @@ def compute_normalization(psi,i):
     return simp_integrate(lambda x : psi[i,ind(x)].conj().T*psi[i,ind(x)], P, -0.5*L, 0.5*L-L/P)
     #return simp_integrate(lambda x : psi[i,ind(x)], P-1, -0.5*L, 0.5*L)
 
-#  Computes the energy
-def compute_energy(psi):
-    return 0
 
+h1 = 1 - h * hbar/(2*m*a**2) *1j
+h2 = h * hbar/(4*m*a**2) *1j
+h1_arr = np.full(P,h1)
+for i in range(len(h1_arr)):
+    h1_arr[i] = h1_arr[i] + V(dis(i))
+H = np.diag(h1_arr,0) + np.diag(np.full(P-1,h2),-1) + np.diag(np.full(P-1,h2),1)
+# The internal part of the position integral
+def ener(psi,x):
+    return psi[i].conj().T* H *psi[i]
+#  Computes the energy
+def compute_energy(psi,i):
+    return simp_integrate(lambda x : ener(psi,x), P-1, 0, P-1)*L/P
+
+# The internal part of the position integral
+def pos(psi,x):
+    return psi.conj().T*x*psi
 # Computes the expected position
-def compute_expected_position(psi):
-    return 0
+def compute_expected_position(psi,i):
+    return simp_integrate(lambda x : pos(psi[i,int(x)],x), P-1, 0, P-1)*L/P
 
 
 # Initialize psi
 psi = np.zeros((N,P),np.complex_)
 for i in range(len(psi[0])):
     psi[0][i] = wave(dis(i))
+
 print('norm           ',simp_integrate(wave_abs, P*10, -0.5*L, 0.5*L))
 print('normalization-1',compute_normalization(psi,0))
 psi[0] = psi0*psi[0]
@@ -152,8 +169,8 @@ b2 = h * hbar/(4*m*a**2) *1j
 a1_arr = np.full(P,a1)
 b1_arr = np.full(P,b1)
 for i in range(len(a1_arr)):
-    a1_arr[i] = a1_arr[i] #+ 1j/(2*hbar)*V(dis(i))
-    b1_arr[i] = b1_arr[i] #- 1j/(2*hbar)*V(dis(i))
+    a1_arr[i] = a1_arr[i] + 1j/(2*hbar)*V(dis(i))
+    b1_arr[i] = b1_arr[i] - 1j/(2*hbar)*V(dis(i))
 
 # We defined A with the diagonals as rows so that we can use banded.py
 A = np.array([np.full(P,a2),a1_arr,np.full(P,a2)])
