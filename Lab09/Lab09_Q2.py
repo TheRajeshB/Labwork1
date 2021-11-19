@@ -17,7 +17,8 @@ import numpy as np
 from banded import banded
 
 compute_psi = True
-test = True
+test = False
+case = 'd'
 
 # Constants
 
@@ -31,6 +32,15 @@ kappa = 500/L #m^-1
 P = 1024
 tau = 1e-18 #s
 N = 3000
+if case == 'a':
+    N = 3000
+    x0 = L/5
+elif case == 'c':
+    N = 4000
+    x0 = L/5
+elif case == 'd':
+    N = 6000
+    x0 = L/3
 
 if test:
     P = 100
@@ -44,13 +54,20 @@ T = N*tau #s
 # part a
 x0 = L/5 #m
 
+# The function for psi
 def wave(x):
     return np.exp(-(x-x0)**2/(4*sigma**2) + kappa*x*1j)
 
+# The function for psi* psi
+def wave_abs(x):
+    val = np.exp(-(x-x0)**2/(4*sigma**2) + kappa*x*1j)
+    return val.conj()*val
 
 #psi0 = 1/symb_integrate(wave, -0.5*L, 0.5*L)
-psi0 = 1/simp_integrate(wave, P*10, -0.5*L, 0.5*L)
+psi0 = 1/simp_integrate(wave_abs, P*10, -0.5*L, 0.5*L)
+
 print('psi0', psi0)
+print('psi0 res', psi0*simp_integrate(wave_abs, P*10, -0.5*L, 0.5*L))
 
 
 
@@ -60,30 +77,48 @@ def dis(i):
 
 #Converts distance to index
 def ind(x):
+    return int((x/L+1/2)*P)
     return int(np.round((x/L+1/2)*P))
 
-
-# Initialize psi
-psi = np.zeros((N,P),np.complex_)
-for i in range(len(psi[0])):
-    psi[0][i] = wave(dis(i))
-psi[0] = psi0*psi[0]
-# required functions
-
 # Potential for a square well
-def V(x): #Not used?
-    if -L/2 < x < L/2:
+def V_square(x):
+    if -L/2 <= x <= L/2:
         return 0
     else:
         return np.inf
+
+# Potential for a harmonic oscillator
+omega = 3e15 # rad/s
+def V_harm(x):
+    if -L/2 <= x <= L/2:
+        return 1/2*m*omega**2 * x**2
+    else:
+        return np.inf
+    
+# Potential for a Double well
+V0 = 6e-17 # J
+x1 = L/4
+def V_double(x):
+    if -L/2 <= x <= L/2:
+        return V0*(x**2/x1**2-1)**2
+    else:
+        return np.inf
+    
+
+# required functions
 
 # Discretized Hamiltonian
 def HD(): # Not used, I just followed the textbook implementation
     return 0
 
+# computes the probability of the particle being at a location given the value of the wave function there
+def prob(psi):
+    return psi.conj().T*psi
+
 # Computes the normalization diagnostic (integral of wavefunction?)
 def compute_normalization(psi,i):
-    return simp_integrate(lambda x : psi[i,int(x)], P-1, 0, P-1) * L/P
+    return simp_integrate(lambda x : prob(psi[i,int(x)]), P-1, 0, P-1)*L/P
+    return simp_integrate(lambda x : psi[i,ind(x)].conj().T*psi[i,ind(x)], P, -0.5*L, 0.5*L-L/P)
     #return simp_integrate(lambda x : psi[i,ind(x)], P-1, -0.5*L, 0.5*L)
 
 #  Computes the energy
@@ -94,16 +129,38 @@ def compute_energy(psi):
 def compute_expected_position(psi):
     return 0
 
+
+# Initialize psi
+psi = np.zeros((N,P),np.complex_)
+for i in range(len(psi[0])):
+    psi[0][i] = wave(dis(i))
+print('norm           ',simp_integrate(wave_abs, P*10, -0.5*L, 0.5*L))
+print('normalization-1',compute_normalization(psi,0))
+psi[0] = psi0*psi[0]
+print('normalization 0',compute_normalization(psi,0))
+
+
 # Calculate A & B matrices
 
 
 a1 = 1 + h * hbar/(2*m*a**2) *1j
 a2 = -h * hbar/(4*m*a**2) *1j
-A = np.array([np.full(P,a2),np.full(P,a1),np.full(P,a2)])
 
 b1 = 1 - h * hbar/(2*m*a**2) *1j
 b2 = h * hbar/(4*m*a**2) *1j
-B = np.diag(np.full(P,b1),0) + np.diag(np.full(P-1,b2),-1) + np.diag(np.full(P-1,b2),1)
+
+a1_arr = np.full(P,a1)
+b1_arr = np.full(P,b1)
+for i in range(len(a1_arr)):
+    a1_arr[i] = a1_arr[i] #+ 1j/(2*hbar)*V(dis(i))
+    b1_arr[i] = b1_arr[i] #- 1j/(2*hbar)*V(dis(i))
+
+# We defined A with the diagonals as rows so that we can use banded.py
+A = np.array([np.full(P,a2),a1_arr,np.full(P,a2)])
+# Define B normally
+B = np.diag(b1_arr,0) + np.diag(np.full(P-1,b2),-1) + np.diag(np.full(P-1,b2),1)
+# print(A)
+# print(B)
 
 def advance_timestep(psi,h,n):
     if n < N-1:
@@ -114,13 +171,13 @@ if compute_psi:
     for i in range(N):
         advance_timestep(psi,h,i)
 
-    np.savez('Q3_phi', psi=psi)
+    np.savez('Q3_phi_'+case, psi=psi)
 else:
-    npzfile = np.load('Q3_phi.npz')
+    npzfile = np.load('Q3_phi_'+case+'.npz')
     psi = npzfile['psi']
 
 #print(psi)
-print('normalization 0',compute_normalization(psi,0))
+
 print('normalization N',compute_normalization(psi,N-1))
 
 #Plot the results as an animation
