@@ -111,35 +111,44 @@ def ind(x):
 # required functions
 
 # Discretized Hamiltonian
-def HD(): # Not used, I just followed the textbook implementation
-    return 0
+A1 = - hbar**2/(2*m*a**2)
+Bp = np.zeros(P,np.complex_)
+for i in range(P):
+    Bp[i] = V(dis(i)) + -2*A1
+HD = np.diag(Bp,0) + np.diag(np.full(P-1,A1),-1) + np.diag(np.full(P-1,A1),1)
 
 # computes the probability of the particle being at a location given the value of the wave function there
 def prob(psi):
-    return psi.conj().T*psi
+    return psi.conj()*psi
 
 # Computes the normalization diagnostic (integral of wavefunction?)
 def compute_normalization(psi,i):
     return simp_integrate(lambda x : prob(psi[i,int(x)]), P-1, 0, P-1)*L/P
-    return simp_integrate(lambda x : psi[i,ind(x)].conj().T*psi[i,ind(x)], P, -0.5*L, 0.5*L-L/P)
+    #return simp_integrate(lambda x : psi[i,ind(x)].conj().T*psi[i,ind(x)], P, -0.5*L, 0.5*L-L/P)
     #return simp_integrate(lambda x : psi[i,ind(x)], P-1, -0.5*L, 0.5*L)
 
+once = True
 
-h1 = 1 - h * hbar/(2*m*a**2) *1j
-h2 = h * hbar/(4*m*a**2) *1j
-h1_arr = np.full(P,h1)
-for i in range(len(h1_arr)):
-    h1_arr[i] = h1_arr[i] + V(dis(i))
-H = np.diag(h1_arr,0) + np.diag(np.full(P-1,h2),-1) + np.diag(np.full(P-1,h2),1)
-
-# The internal part of the position integral
-def ener(psi,x):
-    return psi[i].conj().T* H *psi[i]
 #  Computes the energy
+def ener(psi,i):
+
+    #print('once',psi.conj().T.shape, HD.shape, psi.shape)
+
+    # print(psi[i])
+    # psi = [psi[i]]
+    # print(psi[i])
+    print(psi.conj().T.shape, HD.shape, psi.T.shape)
+    print((psi.conj().T*HD).shape, psi.T.shape)
+    print((psi.conj()* HD* psi.T).shape)
+    return (psi.conj().T* HD *psi)[i] # TODO What do I return here?
+    
 def compute_energy(psi,i):
-    E = psi[i].conj().T* H *psi[i]
-    print(np.size(E,0),np.size(E,1))
-    return simp_integrate(lambda x : E[int(x)][int(x)], P-1, 0, P-1)*L/P
+    
+    #print(psi[i][np.newaxis].conj().T)
+    #print(psi[i])
+    en = ener(psi[i][np.newaxis],i)
+    print(en.shape)
+    return simp_integrate(lambda x: en[int(x)], P-1, 0, P-1)*L/P # TODO What do I put in here?
 
 # The internal part of the position integral
 def pos(psi,x):
@@ -244,7 +253,7 @@ ani = FuncAnimation(fig, update, frames=N, interval=1,
                     init_func=init, blit=True)
 
 # Save the animation (need ffmpeg)
-""" f = 'Q3_vid.mp4' 
+""" f = 'Q3_vid_'+case+'.mp4' 
 writervideo = FFMpegWriter(fps=60) 
 ani.save(f, writer=writervideo) """
 
