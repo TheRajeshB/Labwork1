@@ -5,6 +5,7 @@
 
 This code will solve the time-dependant schrodinger equation with the Crank-Nicolson method, and will output a video file for one of the cases: b, c, or d.
 '''
+from math import inf
 from numpy.random import rand
 from numpy.linalg import solve
 from numpy import dot,mean
@@ -16,7 +17,9 @@ import numpy as np
 
 from banded import banded
 
-compute_psi = True
+compute_psi = False
+compute_X = False
+compute_en = True
 test = False
 case = 'c'
 
@@ -105,8 +108,6 @@ def dis(i):
 #Converts distance to index
 def ind(x):
     return int((x/L+1/2)*P)
-    return int(np.round((x/L+1/2)*P))
-
 
 # required functions
 
@@ -127,19 +128,18 @@ def compute_normalization(psi,i):
     #return simp_integrate(lambda x : psi[i,ind(x)].conj().T*psi[i,ind(x)], P, -0.5*L, 0.5*L-L/P)
     #return simp_integrate(lambda x : psi[i,ind(x)], P-1, -0.5*L, 0.5*L)
 
-once = True
-
 #  Computes the energy
 def ener(psi,i):
 
     #print('once',psi.conj().T.shape, HD.shape, psi.shape)
-
+    print('matrix shapes:')
     # print(psi[i])
     # psi = [psi[i]]
     # print(psi[i])
-    print(psi.conj().T.shape, HD.shape, psi.T.shape)
-    print((psi.conj().T*HD).shape, psi.T.shape)
-    print((psi.conj()* HD* psi.T).shape)
+    # print(psi.conj().T.shape, HD.shape, psi.T.shape)
+    print('wtf starter:',psi.conj().T.shape, psi.conj().shape)
+    print('wtf result :',(psi.conj().T*HD).shape, (psi.conj()*HD).shape)
+    print('final',(psi.conj()* HD* psi.T).shape)
     return (psi.conj().T* HD *psi)[i] # TODO What do I return here?
     
 def compute_energy(psi,i):
@@ -147,7 +147,7 @@ def compute_energy(psi,i):
     #print(psi[i][np.newaxis].conj().T)
     #print(psi[i])
     en = ener(psi[i][np.newaxis],i)
-    print(en.shape)
+    #print(en.shape)
     return simp_integrate(lambda x: en[int(x)], P-1, 0, P-1)*L/P # TODO What do I put in here?
 
 # The internal part of the position integral
@@ -167,7 +167,7 @@ print('norm           ',simp_integrate(wave_abs, P*10, -0.5*L, 0.5*L))
 print('normalization-1',compute_normalization(psi,0))
 psi[0] = psi0*psi[0]
 print('normalization 0',compute_normalization(psi,0))
-
+print('position 0',compute_expected_position(psi, 0))
 #comput energy
 
 print('energy 0',compute_energy(psi,0))
@@ -209,25 +209,45 @@ else:
     npzfile = np.load('Q3_phi_'+case+'.npz')
     psi = npzfile['psi']
 
+X = np.zeros(N,np.complex_)
+if compute_X:
+    for i in range(N):
+        X[i] = compute_expected_position(psi,i)
+
+    np.savez('Q3_X_'+case, X=X)
+else:
+    npzfile = np.load('Q3_X_'+case+'.npz')
+    X = npzfile['X']
+
+energy = np.zeros(N,np.complex_)
+""" if compute_en:
+    for i in range(N):
+        X[i] = compute_energy(psi,i)
+
+    np.savez('Q3_en_'+case, en=en)
+else:
+    npzfile = np.load('Q3_en_'+case+'.npz')
+    energy = npzfile['en'] """
 #print(psi)
 
 print('normalization N',compute_normalization(psi,N-1))
 print('energy N',compute_energy(psi,N-1))
-
+print('position N',X[N-1])
 #Plot the results as an animation
 from matplotlib.animation import FuncAnimation, FFMpegWriter
 
 fig, ax = plt.subplots()
 ax.grid(which='both', axis='y')
-ax.set_title('Probability') 
-ax.set_xlabel('x')
-ax.set_ylabel('Value')
+ax.set_title('Phi (Real Part)') 
+ax.set_xlabel('Position (m)')
+ax.set_ylabel('Real Value')
 xdata, ydata = [], []
 line, = plt.plot([], [])
 time_text = ax.text(0.1, 0.1, 'time = ', transform=ax.transAxes)
+vline = ax.axvline(X[0])
 
 def init():
-    ax.set_xlim(-L, L)
+    ax.set_xlim(-6/10*L, 6/10*L)
     ax.set_ylim(np.min(psi), np.max(psi))
     time_text.set_text('time = ')
     return line,
@@ -247,14 +267,15 @@ def update(i):
     y = psi[i,:]
     line.set_data(x, y)
     time_text.set_text('time = {:1.2e}'.format(i*h))
+    vline.set_data( [i, i], [-inf, inf])
     return line, time_text
 
 ani = FuncAnimation(fig, update, frames=N, interval=1,
                     init_func=init, blit=True)
 
 # Save the animation (need ffmpeg)
-""" f = 'Q3_vid_'+case+'.mp4' 
+f = 'Q3_vid_'+case+'.mp4' 
 writervideo = FFMpegWriter(fps=60) 
-ani.save(f, writer=writervideo) """
+ani.save(f, writer=writervideo)
 
 plt.show()
