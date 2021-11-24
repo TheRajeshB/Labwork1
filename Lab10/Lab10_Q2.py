@@ -55,6 +55,7 @@ compute_scatters = True
 part = 'c' # Choose between part b and c
 N = int(1e5)
 
+tau_max = 10
 if part == 'b':
     tau_max = 10
 elif part == 'c':
