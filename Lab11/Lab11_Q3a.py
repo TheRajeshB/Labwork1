@@ -14,15 +14,13 @@ from numpy import empty
 from random import random,randrange,seed
 import time
 
-from numpy.lib.function_base import append
-
-N = 25
-R = 0.02
+N = 25 # Number of cities
+n = 5 # Number of different routes to find
 Tmax = 10.0
 Tmin = 1e-3
-tau = 1e5
-n = 5
-compute_paths = True
+tau = 1e4
+
+compute_paths = True # Compute values rather than use saved ones
 
 ns = 14
 seed(ns)
@@ -46,21 +44,17 @@ for i in range(N):
 r[N] = r[0]
 D = distance()
 
-# Set up the graphics
-# display(center=[0.5,0.5])
-# for i in range(N):
-#     sphere(pos=r[i],radius=R)
-# l = curve(pos=r,radius=R/2)
-
-
+# Lists for storing each annealing processes data (will have length n)
 Ds = []
 rs = []
 
 if compute_paths:
     # Main loop
     for i in range (n):
-        ns = (time.time() * 1000)*(i+1)
-        seed(ns) # randomize the seed for the following paths
+        # Change the seed for each path
+        #ns = (time.time() * 1000)*(i+1) # Really randomize it
+        ns = ns*i
+        seed(ns) 
         #print(ns)
         t = 0
         T = Tmax
@@ -69,10 +63,6 @@ if compute_paths:
             # Cooling
             t += 1
             T = Tmax*exp(-t/tau)
-
-            # Update the visualization every 100 moves
-            # if t%100==0:
-            #     l.pos = r
 
             # Choose two cities to swap and make sure they are distinct
             i,j = randrange(1,N),randrange(1,N)
@@ -105,27 +95,23 @@ plt.figure()
 
 plt.scatter(r[:, 0], r[:, 1], marker='o', c='r')  # plot Cities
 plt.plot(r[0, 0], r[0, 1], marker='o', c='k', label='Start/End')  # plot Start
-offset = 0.004
+
+# Try to plot each of the different paths, with an offset in x,y that will allow you to see each one
+# (Doesn't work for lines parallel to x=y)
+offset = 0.006
 colorlist = ['red','orange','limegreen','blue','blueviolet']
+colorlist.reverse()
 for i in range(n):
-    plt.plot(rs[i][:, 0]+offset*(i-n/2), rs[i][:, 1]+offset*(i-n/2), '-', c=colorlist[i%5], label='D = {0:.2f}'.format(Ds[i]))  # plot paths
+    plt.plot(rs[i][:, 0], rs[i][:, 1]+offset*(i-n/2), '-', c=colorlist[i%5], label='D = {0:.2f}'.format(Ds[i]))  # plot paths
 
 plt.title('Travelling Salesman Paths,\n tau = {0:.1f}'.format(tau))
 plt.legend()
-# plot monomers
-
-# plt.xlim([N/3.0, 5.0*N/3.0])
-# plt.ylim([N/3.0, 5.0*N/3.0])
 plt.axis('equal')
-# plt.xticks([])  # we just want to see the shape
-# plt.yticks([])
 plt.tight_layout()
 
 dpi = 150
 plt.savefig('Q3a_final_path_Tau{0:.1f}_N{1:d}_n{2:}_Tmax{3:.1f}.png'.format(tau, N, n, Tmax),
             dpi=dpi)
 
-# print('Energy averaged over last half of simulations is: {0:.2f}'
-#       .format(np.mean(energy_array[n//2:])))
 print('Total distance: {:.2f} +- {:.2f}'.format(np.average(Ds), np.std(Ds)))
 plt.show()

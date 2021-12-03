@@ -1,131 +1,123 @@
 # -*- coding: utf-8 -*-
-'''Created on 2021-12-01
+'''Created on 2021-12-02
 
 @author: Gabriel Bailey
-Adapted from salesman.py
+Adapted from Q3a
 
-This code will test the sensitivity to tau of the simulated annealing optimization for the travelling salesman problem. It will output a plot of some of the paths taken.
+This code will find the minium value of a function via annealing. It will print data about the simulation including it's final values, and then output plots of the x, y, and f(x,y) values over time.
 '''
 import matplotlib.pyplot as plt
 import numpy as np
 
-from math import sqrt,exp
-from numpy import empty
-from random import random,randrange,seed
-import time
+from math import sqrt,exp,cos,pi
+from random import random,seed
 
-from numpy.lib.function_base import append
-
-N = 25
-R = 0.02
+# For i : 10.0, 1e-4, 1e5
+# For ii: 10.0, 1e-4, 1e5 (same)
 Tmax = 10.0
-Tmin = 1e-3
+Tmin = 1e-4
 tau = 1e5
-n = 5
-compute_paths = True
+compute_data = True
+part = 'ii'
 
-ns = 14
+ns = 20
 seed(ns)
 
-# Function to calculate the magnitude of a vector
-def mag(x):
-    return sqrt(x[0]**2+x[1]**2)
+# Function to generate random gaussian number in a repeatable way
+def gauss_dist(sigma):
+    z = random()
+    theta = 2*pi*random()
+    r = (-2*sigma*np.log(1-z))**(1/2)
+    x = r*np.cos(theta)
+    y = r*np.sin(theta)
+    return x,y
 
-# Function to calculate the total length of the tour
-def distance():
-    s = 0.0
-    for i in range(N):
-        s += mag(r[i+1]-r[i])
-    return s
+# The function we are finding the min of
+def func(x,y):
+    if part == 'i':
+        return x**2 - cos(4*pi*x) + (y-1)**2
+    elif part == 'ii':
+        return cos(x) + cos(sqrt(2)*x) + cos(sqrt(3)*x) + (y-1)**2
+    else:
+        raise ValueError('Wrong part: only parts i and ii supported')
 
-# Choose N city locations and calculate the initial distance
-r = empty([N+1,2],float)
-for i in range(N):
-    r[i,0] = random()
-    r[i,1] = random()
-r[N] = r[0]
-D = distance()
+t = 0
+xs = [2]
+ys = [2]
+f_vals = [func(xs[0], ys[0])]
 
-# Set up the graphics
-# display(center=[0.5,0.5])
-# for i in range(N):
-#     sphere(pos=r[i],radius=R)
-# l = curve(pos=r,radius=R/2)
-
-
-Ds = []
-rs = []
-
-if compute_paths:
+if compute_data:
     # Main loop
-    for i in range (n):
-        ns = (time.time() * 1000)*(i+1)
-        seed(ns) # randomize the seed for the following paths
-        #print(ns)
-        t = 0
-        T = Tmax
-        while T>Tmin:
+    
+    T = Tmax
+    while T>Tmin:
 
-            # Cooling
-            t += 1
-            T = Tmax*exp(-t/tau)
+        # Cooling
+        t += 1
+        T = Tmax*exp(-t/tau)
 
-            # Update the visualization every 100 moves
-            # if t%100==0:
-            #     l.pos = r
+        # Monte Carlo move
+        dx,dy = gauss_dist(1)
+        x = xs[t-1]+dx
+        y = ys[t-1]+dy
+        f_val = func(x,y)
+        
+        delta_f = f_val - f_vals[t-1]
+        
+        # Reject values outside the given range for part ii
+        extra_cond = (part == 'ii') and not ((0<x<50) and (-20<y<20)) 
+        # If the move is rejected, reuse the old values, otherwise add the new ones
+        if random()>exp(-delta_f/T) or extra_cond:
+            xs.append(xs[t-1])
+            ys.append(ys[t-1])
+            f_vals.append(f_vals[t-1])
+        else:
+            xs.append(x)
+            ys.append(y)
+            f_vals.append(f_val)
 
-            # Choose two cities to swap and make sure they are distinct
-            i,j = randrange(1,N),randrange(1,N)
-            while i==j:
-                i,j = randrange(1,N),randrange(1,N)
-
-            # Swap them and calculate the change in distance
-            oldD = D
-            r[i,0],r[j,0] = r[j,0],r[i,0]
-            r[i,1],r[j,1] = r[j,1],r[i,1]
-            D = distance()
-            deltaD = D - oldD
-
-            # If the move is rejected, swap them back again
-            if random()>exp(-deltaD/T):
-                r[i,0],r[j,0] = r[j,0],r[i,0]
-                r[i,1],r[j,1] = r[j,1],r[i,1]
-                D = oldD
-        Ds.append(D)
-        rs.append(r.copy())
-
-    np.savez('Q3a_paths_{:.2f}_{}'.format(tau,n), rs=rs, Ds=Ds,)
+    # Save or load depending on whether compute_data is set to true or not
+    np.savez('Q3b{}_data_{:.2f}_{:.2f}_{:.2f}'.format(part,tau,Tmax,Tmin), xs=xs, ys=ys, f_vals=f_vals, t=t)
 else:
-    npzfile = np.load('Q3a_paths_{:.2f}_{}.npz'.format(tau,n))
-    rs = npzfile['rs']
-    Ds = npzfile['Ds']
+    npzfile = np.load('Q3b{}_data_{:.2f}_{:.2f}_{:.2f}.npz'.format(part,tau,Tmax,Tmin))
+    xs = npzfile['xs']
+    ys = npzfile['ys']
+    f_vals = npzfile['f_vals']
+    t = npzfile['t']
 
+# Print the simulation info
+print('Paramaters: Tau={}, Tmax={}, Tmin={}'.format(tau,Tmax,Tmin))
 
-plt.figure()
+print('Final f value: {:}'.format(f_vals[-1]))
+print('max f value: {:}'.format(np.max(f_vals)))
+print('min f value: {:}'.format(np.min(f_vals)))
 
-plt.scatter(r[:, 0], r[:, 1], marker='o', c='r')  # plot Cities
-plt.plot(r[0, 0], r[0, 1], marker='o', c='k', label='Start/End')  # plot Start
-offset = 0.004
-colorlist = ['red','orange','limegreen','blue','blueviolet']
-for i in range(n):
-    plt.plot(rs[i][:, 0]+offset*(i-n/2), rs[i][:, 1]+offset*(i-n/2), '-', c=colorlist[i%5], label='D = {0:.2f}'.format(Ds[i]))  # plot paths
+print('Final x y: {:f}, {:f}'.format(xs[-1],ys[-1]))
 
-plt.title('Travelling Salesman Paths,\n tau = {0:.1f}'.format(tau))
-plt.legend()
-# plot monomers
-
-# plt.xlim([N/3.0, 5.0*N/3.0])
-# plt.ylim([N/3.0, 5.0*N/3.0])
-plt.axis('equal')
-# plt.xticks([])  # we just want to see the shape
-# plt.yticks([])
-plt.tight_layout()
-
+# Plot the results
 dpi = 150
-plt.savefig('Q3a_final_path_Tau{0:.1f}_N{1:d}_n{2:}_Tmax{3:.1f}.png'.format(tau, N, n, Tmax),
-            dpi=dpi)
+# Plot the f value over time (for testing)
+""" plt.figure()
+plt.title('Annealing Function Values,\n tau = {0:.1f}'.format(tau))
+plt.xlabel('Time (steps)')
+plt.ylabel('Function Value')
+plt.plot(np.arange(len(f_vals)),f_vals, '.', )#label='D = {0:.2f}'.format(Ds[i]))  # plot paths
+plt.tight_layout() """
 
-# print('Energy averaged over last half of simulations is: {0:.2f}'
-#       .format(np.mean(energy_array[n//2:])))
-print('Total distance: {:.2f} +- {:.2f}'.format(np.average(Ds), np.std(Ds)))
+# Plot the x value over time
+plt.figure()
+plt.title('Annealing x Values')
+plt.xlabel('Time (steps)')
+plt.ylabel('x Value')
+plt.plot(np.arange(len(xs)),xs, ',', )
+plt.savefig('Q3b{}_x.png'.format(part), dpi=dpi)
+
+# Plot the y value over time
+plt.figure()
+plt.title('Annealing y Values')
+plt.xlabel('Time (steps)')
+plt.ylabel('y Value')
+plt.plot(np.arange(len(ys)),ys, ',', )
+plt.savefig('Q3b{}_y.png'.format(part), dpi=dpi)
+
 plt.show()
